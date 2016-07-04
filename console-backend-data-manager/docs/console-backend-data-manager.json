@@ -1,0 +1,587 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"description": "This is the documentation for the PNDA console backend data manager.",
+		"version": "1.0.0",
+		"title": "PNDA Console Backend Data Manager",
+		"termsOfService": "http://pnda.cisco.com/terms/",
+		"contact": {
+			"email": "pnda.team@external.cisco.com"
+		},
+		"license": {
+			"name": "Apache 2.0",
+			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+		}
+	},
+	"host": "localhost:3123",
+	"basePath": "",
+	"tags": [
+		{
+			"name": "applications",
+			"externalDocs": {
+				"description": "Find out more",
+				"url": "http://pnda.cisco.com"
+			}
+		},
+		{
+			"name": "datasets"
+			
+		},
+		{
+			"name": "endpoints"
+		},
+		{
+			"name": "login"
+		},
+		{
+			"name": "metrics"
+		},
+		{
+			"name": "packages"
+		}
+	],
+	"schemes": [
+		"http"
+	],
+	"paths": {
+		"/applications": {
+			"get": {
+				"tags": [
+					"applications"
+				],
+				"summary": "Get the list of applications",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/applications/{appId}": {
+			"put": {
+				"tags": [
+					"applications"
+				],
+				"summary": "Create a new application from a package",
+				"parameters": [
+					{
+						"name": "appId",
+						"in": "path",
+						"description": "application ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/xml"
+				]
+			},
+			"delete": {
+				"tags": [
+					"applications"
+				],
+				"summary": "Delete an installed application",
+				"parameters": [
+					{
+						"name": "appId",
+						"in": "path",
+						"description": "application ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/applications/{appId}/start": {
+			"post": {
+				"tags": [
+					"applications"
+				],
+				"summary": "Start an application that is currently not running",
+				"parameters": [
+					{
+						"name": "appId",
+						"in": "path",
+						"description": "application ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/applications/{appId}/stop": {
+			"post": {
+				"tags": [
+					"applications"
+				],
+				"summary": "Stop an application that is currently running",
+				"parameters": [
+					{
+						"name": "appId",
+						"in": "path",
+						"description": "application ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/datasets": {
+			"get": {
+				"tags": [
+					"datasets"
+				],
+				"summary": "Get a list of datasets",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/datasets/{datasetId}": {
+			"get": {
+				"tags": [
+					"datasets"
+				],
+				"summary": "Get info for a dataset",
+				"parameters": [
+					{
+						"name": "datasetId",
+						"in": "path",
+						"description": "dataset ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"produces": [
+					"application/xml"
+				]
+			},
+			"put": {
+				"tags": [
+					"datasets"
+				],
+				"summary": "Change data retention policies for a dataset",
+				"parameters": [
+					{
+						"name": "datasetId",
+						"in": "path",
+						"description": "dataset ID",
+						"required": true,
+						"type": "string"
+					},
+					{
+						"in": "body",
+						"name": "body",
+						"description": "--",
+						"required": true,
+						"type": "object",
+						"schema": {
+							"properties": {
+								"mode": {
+									"name": "mode",
+									"required": false,
+									"type": "string",
+									"enum": ["archive", "delete"]
+								},
+								"policy": {
+									"name": "mode",
+									"required": false,
+									"type": "string",
+									"enum": ["age", "size"]
+								},
+								"max_age_days": {
+									"name": "mode",
+									"required": false,
+									"type": "integer",
+									"format": "int64",
+									"minimum": 1,
+									"maximum": 36500
+								},
+								"max_size_gigabytes": {
+									"name": "mode",
+									"required": false,
+									"type": "integer",
+									"format": "int64",
+									"minimum": 1,
+									"maximum": 1000000
+								}
+					        },
+					        "type": "object"
+						}
+					}
+				],
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/endpoints": {
+			"get": {
+				"tags": [
+					"endpoints"
+				],
+				"summary": "Get the list of endpoints",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/login": {
+			"get": {
+				"tags": [
+					"login"
+				],
+				"summary": "TODO: what does this do?",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/login/validate": {
+			"post": {
+				"tags": [
+					"login"
+				],
+				"summary": "Validate user credentials and return access info",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/": {
+			"get": {
+				"tags": [
+					"metrics"
+				],
+				"summary": "Get all data listings regardless of type",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/metrics": {
+			"get": {
+				"tags": [
+					"metrics"
+				],
+				"summary": "Get the list of metrics",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/metrics/{metricId}": {
+			"get": {
+				"tags": [
+					"metrics"
+				],
+				"summary": "Get info for a metric",
+				"parameters": [
+					{
+						"name": "metricId",
+						"in": "path",
+						"description": "metric ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/packages": {
+			"get": {
+				"tags": [
+					"packages"
+				],
+				"summary": "Get the list of packages",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/packages/deployed": {
+			"get": {
+				"tags": [
+					"packages"
+				],
+				"summary": "Get the packages that have been deployed",
+				"produces": [
+					"application/xml"
+				]
+			}
+		},
+		"/packages/{packageId}": {
+			"get": {
+				"tags": [
+					"packages"
+				],
+				"summary": "Get info for a package",
+				"parameters": [
+					{
+						"name": "packageId",
+						"in": "path",
+						"description": "package ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"produces": [
+					"application/xml"
+				]
+			},
+			"put": {
+				"tags": [
+					"packages"
+				],
+				"summary": "Deploy a package",
+				"parameters": [
+					{
+						"name": "packageId",
+						"in": "path",
+						"description": "package ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/xml"
+				]
+			},
+			"delete": {
+				"tags": [
+					"packages"
+				],
+				"summary": "Remove a package that has been deployed",
+				"parameters": [
+					{
+						"name": "packageId",
+						"in": "path",
+						"description": "package ID",
+						"required": true,
+						"type": "string"
+					}
+				],
+				"produces": [
+					"application/xml"
+				]
+			}
+		}
+	},
+	"securityDefinitions": {
+		"petstore_auth": {
+			"type": "oauth2",
+			"authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+			"flow": "implicit",
+			"scopes": {
+				"write:pets": "modify pets in your account",
+				"read:pets": "read your pets"
+			}
+		},
+		"api_key": {
+			"type": "apiKey",
+			"name": "api_key",
+			"in": "header"
+		}
+	},
+	"definitions": {
+		"Order": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"petId": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"quantity": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"shipDate": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"status": {
+					"type": "string",
+					"description": "Order Status",
+					"enum": [
+						"placed",
+						"approved",
+						"delivered"
+					]
+				},
+				"complete": {
+					"type": "boolean",
+					"default": false
+				}
+			},
+			"xml": {
+				"name": "Order"
+			}
+		},
+		"User": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"username": {
+					"type": "string"
+				},
+				"firstName": {
+					"type": "string"
+				},
+				"lastName": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				},
+				"phone": {
+					"type": "string"
+				},
+				"userStatus": {
+					"type": "integer",
+					"format": "int32",
+					"description": "User Status"
+				}
+			},
+			"xml": {
+				"name": "User"
+			}
+		},
+		"Category": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"xml": {
+				"name": "Category"
+			}
+		},
+		"Tag": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"xml": {
+				"name": "Tag"
+			}
+		},
+		"Pet": {
+			"type": "object",
+			"required": [
+				"name",
+				"photoUrls"
+			],
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"category": {
+					"$ref": "#/definitions/Category"
+				},
+				"name": {
+					"type": "string",
+					"example": "doggie"
+				},
+				"photoUrls": {
+					"type": "array",
+					"xml": {
+						"name": "photoUrl",
+						"wrapped": true
+					},
+					"items": {
+						"type": "string"
+					}
+				},
+				"tags": {
+					"type": "array",
+					"xml": {
+						"name": "tag",
+						"wrapped": true
+					},
+					"items": {
+						"$ref": "#/definitions/Tag"
+					}
+				},
+				"status": {
+					"type": "string",
+					"description": "pet status in the store",
+					"enum": [
+						"available",
+						"pending",
+						"sold"
+					]
+				}
+			},
+			"xml": {
+				"name": "Pet"
+			}
+		},
+		"ApiResponse": {
+			"type": "object",
+			"properties": {
+				"code": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"type": {
+					"type": "string"
+				},
+				"message": {
+					"type": "string"
+				}
+			}
+		}
+	},
+	"externalDocs": {
+		"url": "http://pnda.cisco.com"
+	}
+}

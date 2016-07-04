@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <script src=/socket.io/socket.io.js></script>
+    <script>
+    var host = "10.230.48.130", port = "3123";
+
+    var socket = io('http://'+host+':'+port);
+    socket.on('update', function(obj){
+      if(obj.channel == "kafka.metric.name"){
+        document.getElementById('kafka').innerHTML = obj.message;
+      } else if(obj.channel == "hadoop.metric.name"){
+        document.getElementById('hadoop').innerHTML = obj.message;
+      } else {
+        // nothing - message isn't for us
+      }
+
+    });
+    </script>
+  </head>
+  <body>
+    <p>Simple PNDA EOI Console UI test app :</p>
+    <p>Kafka: <span id="kafka">No Notifications</span></p>
+    <p>Hadoop: <span id="hadoop">No Notifications</span></p>
+  </body>
+</html>

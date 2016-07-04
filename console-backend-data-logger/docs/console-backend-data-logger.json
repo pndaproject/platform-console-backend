@@ -1,0 +1,412 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"description": "This is the documentation for the PNDA console backend data logger.",
+		"version": "1.0.0",
+		"title": "PNDA Console Backend Data Logger",
+		"termsOfService": "http://pnda.cisco.com/terms/",
+		"contact": {
+			"email": "pnda.team@external.cisco.com"
+		},
+		"license": {
+			"name": "Apache 2.0",
+			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+		}
+	},
+	"host": "localhost:3001",
+	"basePath": "",
+	"tags": [
+		{
+			"name": "metrics"
+		},
+		{
+			"name": "applications"
+		},
+		{
+			"name": "packages"
+		}
+	],
+	"schemes": [
+		"http"
+	],
+	"paths": {
+		"/metrics": {
+			"post": {
+				"tags": [
+					"metrics"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "--",
+						"required": true,
+						"type": "object",
+						"schema": {
+							"properties": {
+                "data": {
+                  "type": "array",
+                  "required": true,
+                  "items": {
+                    "$ref": "#/definitions/metricData"
+                  }
+                },
+                "timestamp": {
+									"name": "timestamp",
+									"$ref": "#/definitions/timestamp"
+                }
+					    },
+					    "type": "object"
+						}
+					}
+				],
+				"summary": "Add a metric value",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				]
+			}
+		},
+		"/applications": {
+			"post": {
+				"tags": [
+					"applications"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "--",
+						"required": true,
+						"type": "object",
+						"schema": {
+							"properties": {
+                "data": {
+                  "type": "array",
+                  "required": true,
+                  "items": {
+                    "$ref": "#/definitions/applicationData"
+                  }
+                },
+                "timestamp": {
+									"name": "timestamp",
+									"$ref": "#/definitions/timestamp"
+                }
+					    },
+					    "type": "object"
+						}
+					}
+				],
+				"summary": "Create an application",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				]
+			}
+		},
+		"/packages": {
+			"post": {
+				"tags": [
+					"packages"
+				],
+				"parameters": [
+					{
+						"in": "body",
+						"name": "body",
+						"description": "--",
+						"required": true,
+						"type": "object",
+						"schema": {
+							"properties": {
+                "data": {
+                  "type": "array",
+                  "required": true,
+                  "items": {
+                    "$ref": "#/definitions/packageData"
+                  }
+                },
+                "timestamp": {
+									"name": "timestamp",
+									"$ref": "#/definitions/timestamp"
+                }
+					    },
+					    "type": "object"
+						}
+					}
+				],
+				"summary": "Create a package",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json"
+				]
+			}
+		}
+	},
+	"securityDefinitions": {
+		"petstore_auth": {
+			"type": "oauth2",
+			"authorizationUrl": "http://petstore.swagger.io/oauth/dialog",
+			"flow": "implicit",
+			"scopes": {
+				"write:pets": "modify pets in your account",
+				"read:pets": "read your pets"
+			}
+		},
+		"api_key": {
+			"type": "apiKey",
+			"name": "api_key",
+			"in": "header"
+		}
+	},
+	"definitions": {
+    "timestamp": {
+			"name": "timestamp",
+			"required": true,
+			"type": "integer",
+			"format": "int64",
+			"minimum": 1462986326,
+      "default": 1462986326,
+			"maximum": 2094138346
+    },
+    "metricData": {
+      "type": "object",
+      "required": [ "source", "metric", "value", "timestamp" ],
+      "properties": {
+        "source": {
+          "type": "string",
+          "default": "component"
+        },
+        "metric": {
+          "type": "string",
+          "default": "component.health"
+        },
+        "value": {
+          "type": "string",
+          "default": "OK"
+        },
+        "causes": {
+          "type": "string",
+          "default": "The component health is OK."
+        },
+        "timestamp": {
+					"name": "timestamp",
+					"$ref": "#/definitions/timestamp"
+        }
+      }
+    },
+    "applicationData": {
+      "type": "object",
+      "required": [ "id", "state", "timestamp" ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "default": "applicationId"
+        },
+        "state": {
+          "type": "string",
+          "default": "RUNNING"
+        },
+        "timestamp": {
+					"name": "timestamp",
+					"$ref": "#/definitions/timestamp"
+        }
+      }
+    },
+    "packageData": {
+      "type": "object",
+      "required": [ "id", "state", "timestamp" ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "default": "packageId"
+        },
+        "state": {
+          "type": "string",
+          "default": "DEPLOYED"
+        },
+        "timestamp": {
+					"name": "timestamp",
+					"$ref": "#/definitions/timestamp"
+        }
+      }
+    },
+		"Order": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"petId": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"quantity": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"shipDate": {
+					"type": "string",
+					"format": "date-time"
+				},
+				"status": {
+					"type": "string",
+					"description": "Order Status",
+					"enum": [
+						"placed",
+						"approved",
+						"delivered"
+					]
+				},
+				"complete": {
+					"type": "boolean",
+					"default": false
+				}
+			},
+			"xml": {
+				"name": "Order"
+			}
+		},
+		"User": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"username": {
+					"type": "string"
+				},
+				"firstName": {
+					"type": "string"
+				},
+				"lastName": {
+					"type": "string"
+				},
+				"email": {
+					"type": "string"
+				},
+				"password": {
+					"type": "string"
+				},
+				"phone": {
+					"type": "string"
+				},
+				"userStatus": {
+					"type": "integer",
+					"format": "int32",
+					"description": "User Status"
+				}
+			},
+			"xml": {
+				"name": "User"
+			}
+		},
+		"Category": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"xml": {
+				"name": "Category"
+			}
+		},
+		"Tag": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"name": {
+					"type": "string"
+				}
+			},
+			"xml": {
+				"name": "Tag"
+			}
+		},
+		"Pet": {
+			"type": "object",
+			"required": [
+				"name",
+				"photoUrls"
+			],
+			"properties": {
+				"id": {
+					"type": "integer",
+					"format": "int64"
+				},
+				"category": {
+					"$ref": "#/definitions/Category"
+				},
+				"name": {
+					"type": "string",
+					"example": "doggie"
+				},
+				"photoUrls": {
+					"type": "array",
+					"xml": {
+						"name": "photoUrl",
+						"wrapped": true
+					},
+					"items": {
+						"type": "string"
+					}
+				},
+				"tags": {
+					"type": "array",
+					"xml": {
+						"name": "tag",
+						"wrapped": true
+					},
+					"items": {
+						"$ref": "#/definitions/Tag"
+					}
+				},
+				"status": {
+					"type": "string",
+					"description": "pet status in the store",
+					"enum": [
+						"available",
+						"pending",
+						"sold"
+					]
+				}
+			},
+			"xml": {
+				"name": "Pet"
+			}
+		},
+		"ApiResponse": {
+			"type": "object",
+			"properties": {
+				"code": {
+					"type": "integer",
+					"format": "int32"
+				},
+				"type": {
+					"type": "string"
+				},
+				"message": {
+					"type": "string"
+				}
+			}
+		}
+	},
+	"externalDocs": {
+		"url": "http://pnda.cisco.com"
+	}
+}

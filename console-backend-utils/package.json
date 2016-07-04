@@ -1,0 +1,18 @@
+{
+  "name": "platform-console-backend-utils",
+  "version": "0.2.0",
+  "description": "Common shared utils for the different platform console backend applications",
+  "main": "",
+  "dependencies": {
+    "async": "^1.5.0",
+    "redis": "^2.4.2",
+    "winston": "^2.1.1"
+  },
+  "devDependencies": {
+    "grunt-contrib-jshint": "~0.6.4",
+    "grunt-contrib-watch": "~0.5.3",
+    "grunt": "~0.4.2",
+    "grunt-jscs": "2.8.0",
+    "grunt-jsdoc": "1.1.0"
+  }
+}
