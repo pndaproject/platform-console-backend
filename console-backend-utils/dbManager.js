@@ -72,7 +72,8 @@ module.exports = {
     }
   },
 
-  // Add historic data
+  // Add historic data to redis
+	// not used
   zadd: function (id, timestamp, data, callback) {
     if ((id) && (timestamp) && (data)) {
       redisClient.zadd(id, timestamp, JSON.stringify(data),
@@ -124,6 +125,8 @@ module.exports = {
     });
   },
 
+	// get historic data from redis
+	// not used
   getSortedSetRange: function (key, start, end, callback) {
     redisClient.zrange(key, start, end, function(err, reply) {
       if (err) {

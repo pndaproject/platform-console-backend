@@ -59,12 +59,13 @@ router.post('/', cors(corsOptions), function(req, res) {
           callback(error);
         });
 
-		var historyData = {timestamp: item.timestamp, value: item.value};
+/*			var historyData = {timestamp: item.timestamp, value: item.value};
         dbManager.zadd('history:' + item.metric, item.timestamp, historyData, function(error) {
           if (!error) {
             logger.info("Logged historic Metric data for " + item.metric + " ");
           }
-        });
+        }); 
+*/
       } else {
         // problem with the data we received in the create request - so flag an error for now
         callback('Error - missing required data in metric body...');
