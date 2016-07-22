@@ -26,6 +26,8 @@
 var express = require('express');
 var router = express.Router();
 var cors = require('cors');
+var graphite = require('graphite');
+var graphiteClient = graphite.createClient('plaintext://localhost:2003/');
 
 // dbManager
 var dbManager = require('../../console-backend-utils/dbManager');
@@ -58,6 +60,13 @@ router.post('/', cors(corsOptions), function(req, res) {
 
           callback(error);
         });
+
+				var metrics = {};
+				metrics[item.metric] = item.value;
+				console.log("Writing to graphite: " + JSON.stringify(metrics) + " " + item.timestamp);
+				graphiteClient.write(metrics, item.timestamp, function(err) {
+				  if (err !== undefined) console.log("Error writing to graphite: " + err);
+				});
 
 /*			var historyData = {timestamp: item.timestamp, value: item.value};
         dbManager.zadd('history:' + item.metric, item.timestamp, historyData, function(error) {
