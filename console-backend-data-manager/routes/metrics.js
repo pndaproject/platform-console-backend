@@ -64,31 +64,11 @@ router.get('/:id', cors(corsOptions), function(req, res) {
         res.json({ error: error });
       } else {
         // var source = response[0], value = response[1]/*, timestamp = response[2]*/;
-        var json = { metric: key, currentData: {} /*, history: {}*/ };
+        var json = { metric: key, currentData: {} };
         for (var i = 0 ; i < fields.length ; i++) {
           json.currentData[fields[i]] = response[i];
         }
 
-/*				
-				dbManager.getSortedSetRange('history:' + key, 0, -1, function(error, response) {
-	        if (error) {
-	          logger.error("failed to get keys - " + error);
-	        } else {
-						var historyValues = {};
-						
-						for (var j = 0; j < response.length; j++) {
-							var info = JSON.parse(response[j]);
-							var timestamp = info.timestamp;
-							var value = info.value;
-							historyValues[timestamp] = value;
-						}
-						
-						json.history = historyValues;
-						
-	          res.json(json);
-	        }
-				});
-*/
         res.json(json);
       }
     });
