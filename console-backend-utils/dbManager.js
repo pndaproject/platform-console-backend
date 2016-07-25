@@ -72,6 +72,23 @@ module.exports = {
     }
   },
 
+  // Add historic data to redis
+	// not used
+  zadd: function (id, timestamp, data, callback) {
+    if ((id) && (timestamp) && (data)) {
+      redisClient.zadd(id, timestamp, JSON.stringify(data),
+				function(err) {
+		      if (!err) {
+		        logger.info("Added historic data: " + id + " : ", data);
+		      }
+
+		      callback(err);
+				});
+    } else {
+      logger.error("Failed to add data - missing required params...");
+    }
+  },
+
   getAllKeys: function (req, stripPrefix, callback) {
     var param = "*";
     if ((req !== "") && (req !== null)) {
@@ -102,6 +119,22 @@ module.exports = {
         logger.error('data store retrieve request failed: ' + err);
       } else {
         logger.debug('data store retrieve request processed successfully - ' + reply);
+      }
+
+      callback(err, reply);
+    });
+  },
+
+	// get historic data from redis
+	// not used
+  getSortedSetRange: function (key, start, end, callback) {
+    redisClient.zrange(key, start, end, function(err, reply) {
+      if (err) {
+          // One of the iterations produced an error.
+          // All processing will now stop.
+        logger.error('getSortedSetRange request failed: ' + err);
+      } else {
+        logger.debug('getSortedSetRange request processed successfully - ' + reply);
       }
 
       callback(err, reply);
