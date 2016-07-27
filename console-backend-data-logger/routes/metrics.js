@@ -61,12 +61,12 @@ router.post('/', cors(corsOptions), function(req, res) {
           callback(error);
         });
 
-				var metrics = {};
-				metrics[item.metric] = item.value;
-				console.log("Writing to graphite: " + JSON.stringify(metrics) + " " + item.timestamp);
-				graphiteClient.write(metrics, item.timestamp, function(err) {
-				  if (err !== undefined) console.log("Error writing to graphite: " + err);
-				});
+        var metrics = {};
+        metrics[item.metric] = item.value;
+        console.log("Writing to graphite: " + JSON.stringify(metrics) + " " + item.timestamp);
+        graphiteClient.write(metrics, item.timestamp, function(err) {
+          if (err !== undefined) console.log("Error writing to graphite: " + err);
+        });
       } else {
         // problem with the data we received in the create request - so flag an error for now
         callback('Error - missing required data in metric body...');
