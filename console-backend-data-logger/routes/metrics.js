@@ -41,6 +41,23 @@ var async = require('async');
 var hostname = process.env.HOSTNAME || 'localhost';
 var whitelist = ['http://' + hostname, 'http://' + hostname + ':8006', 'http://0.0.0.0:8006'];
 
+// enumerations for converting strings to numbers that can be stored by graphite
+// for example, if the metric contains "health", convert OK to 0, WARN to 1, ERROR to 2
+var valueEnums = {
+  health: {'OK': 0, 'WARN': 1, 'ERROR': 2}
+};
+
+// try to use valueEnums to convert a string to a number so that it can be stored in graphite
+function convertEnumToNumber(metric, value) {
+  for (pattern in valueEnums) {
+    if (metric.indexOf(pattern !== -1)) {
+      var newValue = valueEnums[pattern][value];
+      if (newValue !== undefined) return newValue;
+    }
+  }
+  return value;
+}
+
 var corsOptions = {
   origin: function(origin, callback) {
     var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
@@ -55,15 +72,15 @@ router.post('/', cors(corsOptions), function(req, res) {
       if (item.metric !== null && item.metric !== "") {
         dbManager.create('metric:' + item.metric, item, 'platform-console-backend-metric-update', function(error) {
           if (!error) {
-            logger.info("Logged new Metric data for " + item.metric + " ");
+            // logger.info("Logged new Metric data for " + item.metric + " ");
           }
 
           callback(error);
         });
 
         var metrics = {};
-        metrics[item.metric] = item.value;
-        logger.debug("Writing to graphite: " + JSON.stringify(metrics) + " " + item.timestamp);
+        metrics[item.metric] = convertEnumToNumber(item.metric, item.value);
+        // logger.info("Writing to graphite: " + JSON.stringify(metrics) + " " + item.timestamp);
         graphiteClient.write(metrics, item.timestamp, function(err) {
           if (err !== undefined) logger.error("Error writing to graphite: " + err);
         });
