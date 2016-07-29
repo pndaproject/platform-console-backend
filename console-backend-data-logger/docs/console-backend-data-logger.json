@@ -170,9 +170,9 @@
 			"required": true,
 			"type": "integer",
 			"format": "int64",
-			"minimum": 1462986326,
-      "default": 1462986326,
-			"maximum": 2094138346
+			"minimum": 1462986326000,
+      "default": 1462986326000,
+			"maximum": 2094138346000
     },
     "metricData": {
       "type": "object",
