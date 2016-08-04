@@ -54,10 +54,6 @@ router.post('/', cors(corsOptions), function(req, res) {
     async.each(req.body.data, function(item, callback) {
       if (item.metric !== null && item.metric !== "") {
         dbManager.create('metric:' + item.metric, item, 'platform-console-backend-metric-update', function(error) {
-          if (!error) {
-            logger.info("Logged new Metric data for " + item.metric + " ");
-          }
-
           callback(error);
         });
 

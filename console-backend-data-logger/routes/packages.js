@@ -52,10 +52,6 @@ router.post('/', cors(corsOptions), function(req, res) {
     async.each(req.body.data, function(item, callback) {
       if ((item.id !== null) && (item.id !== "")) {
         dbManager.create('package:' + item.id, item, 'platform-console-backend-package-update', function(error) {
-          if (!error) {
-            logger.info("Logged new package data for " + item.id + " ");
-          }
-
           callback(error);
         });
       } else {

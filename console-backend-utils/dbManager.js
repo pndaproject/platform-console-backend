@@ -53,7 +53,7 @@ module.exports = {
                 function(err) {
                     //console.log(reply);
                   if (!err) {
-                    logger.info("Created new data: " + id + " : ", data);
+                    logger.debug("Created new data: " + id + " : ", data);
 
                     if (notification) {
                         // Pack up our data in to a serialized object for messaging to our backend subscriber which
