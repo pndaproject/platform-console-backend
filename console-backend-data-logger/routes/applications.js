@@ -53,10 +53,6 @@ router.post('/', cors(corsOptions), function(req, res) {
       if (item.id != null && item.id !== "") {
         dbManager.create('application:' + item.id, item, 'platform-console-backend-application-update',
           function(error) {
-            if (!error) {
-              logger.info("Logged new application data for " + item.id);
-            }
-
             callback(error);
           });
       } else {
