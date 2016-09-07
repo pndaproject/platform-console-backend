@@ -1,6 +1,12 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.2.0] 2016-09-07
+### Historical metric support
+* PNDA-820: Console backend stores a timeseries of metric values in graphite
+### Defect Fixes
+* PNDA-1980: Debug output adjusted to prevent console backend log files growing very large
+
 ## [0.1.0] 2016-07-01
 ### First version
 
