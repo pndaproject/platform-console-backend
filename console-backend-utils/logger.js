@@ -24,21 +24,25 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-var winston = require('winston');
+var config = require('./conf/config.json');
+var winstonlr = require('winston-logrotate');
+var rotateTransport = new winstonlr.Rotate({
+        file: config.log_file,
+        colorize: false,
+        timestamp: true,
+        level: 'info',
+        handleExceptions: true,
+        humanReadableUnhandledException: true,
+        json: true,
+        size: '10m',
+        keep: 3,
+        compress: false
+});
+
+var winston = require('winston')
 winston.emitErrs = true;
 
-var config = require('./conf/config.json');
-
-var logger = new (winston.Logger)({ exitOnError: false });
-logger.add(winston.transports.File, {
-  filename: config.log_file,
-  level: 'info',
-  timestamp: true,
-  handleExceptions: true,
-  humanReadableUnhandledException: true,
-  json: true,
-  colorize: false
-});
+var logger = new (winston.Logger)({ exitOnError: false, transports: [rotateTransport] });
 logger.add(winston.transports.Console, {
   level: 'debug',
   timestamp: true,
