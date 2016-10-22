@@ -1,15 +1,15 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.2.1] 2016-10-21
+### Fixed
+- PNDA-2120: Rotate console backend log files to prevent disk filling up
+
 ## [0.2.0] 2016-09-07
 ### Changed
 - PNDA-820: Historical metric support. Console backend stores a timeseries of metric values in graphite
 ### Fixed
 - PNDA-1980: Debug output adjusted to prevent console backend log files growing very large
-
-## [Unreleased]
-### Fixed
-- PNDA-2120: Rotate console backend log files to prevent disk filling up
 
 ## [0.1.0] 2016-07-01
 ### First version
