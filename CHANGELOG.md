@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.2.2] 2016-10-31
+### Fixed
+ - PNDA-2368: Fix version of the redis-parser npm module to 2.0.4.
+
 ## [0.2.1] 2016-10-21
 ### Fixed
 - PNDA-2120: Rotate console backend log files to prevent disk filling up
