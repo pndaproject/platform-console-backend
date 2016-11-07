@@ -14,29 +14,10 @@ node {
             checkout([$class: 'GitSCM', branches: [[name: "tags/${version}"]], extensions: [[$class: 'CleanCheckout']]])
         }
 
-        sh """
-            cp -R console-backend-utils console-backend-data-logger/
-            cd console-backend-data-logger
-            npm install
-            echo "{ \\"name\\": \\"console-backend-data-logger\\", \\"version\\": \\"${version}\\" }" > package-version.json
-            grunt package
+        sh("./build.sh ${version}")
 
-            cd ..
-
-            cp -R console-backend-utils console-backend-data-manager/
-            cd console-backend-data-manager
-            npm install
-            echo "{ \\"name\\": \\"console-backend-data-manager\\", \\"version\\": \\"${version}\\" }" > package-version.json
-            grunt package
-        """
-
-        stage 'Test'
-        sh '''
-        '''
-
-        stage 'Deploy' 
-        build job: 'deploy-component', parameters: [[$class: 'StringParameterValue', name: 'branch', value: env.BRANCH_NAME],[$class: 'StringParameterValue', name: 'component', value: "console"],[$class: 'StringParameterValue', name: 'release_path', value: "platform/releases"],[$class: 'StringParameterValue', name: 'release', value: "${workspace}/console-backend-data-logger/console-backend-data-logger-${version}.tar.gz"]]
-        build job: 'deploy-component', parameters: [[$class: 'StringParameterValue', name: 'branch', value: env.BRANCH_NAME],[$class: 'StringParameterValue', name: 'component', value: "console"],[$class: 'StringParameterValue', name: 'release_path', value: "platform/releases"],[$class: 'StringParameterValue', name: 'release', value: "${workspace}/console-backend-data-manager/console-backend-data-manager-${version}.tar.gz"]]
+        stage 'Deploy'
+        build job: 'deploy', parameters: [[$class: 'StringParameterValue', name: 'artifacts_path', value: "${workspace}/pnda-build"]]
 
         emailext attachLog: true, body: "Build succeeded (see ${env.BUILD_URL})", subject: "[JENKINS] ${env.JOB_NAME} succeeded", to: "${env.EMAIL_RECIPIENTS}"
 
