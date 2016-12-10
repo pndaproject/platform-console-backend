@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.2.3] 2016-12-12
 ### Changed
 - Externalized build logic from Jenkins to shell script so it can be reused
 
