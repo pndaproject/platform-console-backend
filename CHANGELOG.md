@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.2.3] 2016-12-12
+### Changed
+- Externalized build logic from Jenkins to shell script so it can be reused
+
 ## [0.2.2] 2016-10-31
 ### Fixed
  - PNDA-2368: Fix version of the redis-parser npm module to 2.0.4.
