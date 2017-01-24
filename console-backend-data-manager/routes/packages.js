@@ -267,13 +267,16 @@ router.put('/:id', cors(), function(req, res) {
       method: "PUT"
     };
     logger.debug('deploy API call:', request.method, deployAPI);
-    HTTP.request(request).then(function success(response) {
-      logger.info(request.method, request.url, "successful: ", response.status);
-      res.sendStatus(response.status);
-    }, function error(error) {
-      logger.error(request.method, request.url, "failed: ", error.status);
-      res.sendStatus(error.status);
-    });
+    var statusRet = 500;
+    HTTP.request(request)
+         .then(function(response) {
+           logger.info(request.method, request.url, "success: ", response.status);
+           statusRet = response.status; return response.body.read();
+         }, function(error) {
+           logger.error(request.method, request.url, "error: ", error.status);
+           statusRet = error.status;
+         })
+         .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
   } else {
     logger.error("Missing required package id to deploy the package");
     res.sendStatus(500);
@@ -301,13 +304,16 @@ router.delete('/:id', cors(), function(req, res) {
       method: "DELETE"
     };
     logger.debug('undeploy API call:', request.method, deployAPI);
-    HTTP.request(request).then(function success(response) {
-      logger.info(request.method, request.url, "successful: ", response.status);
-      res.sendStatus(response.status);
-    }, function error(error) {
-      logger.error(request.method, request.url, "failed: ", error.status);
-      res.sendStatus(error.status);
-    });
+    var statusRet = 500;
+    HTTP.request(request)
+         .then(function(response) {
+           logger.info(request.method, request.url, "success: ", response.status);
+           statusRet = response.status; return response.body.read();
+         }, function(error) {
+           logger.error(request.method, request.url, "error: ", error.status);
+           statusRet = error.status;
+         })
+         .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
   } else {
     logger.error("Missing required package id to undeploy the package");
     res.sendStatus(500);

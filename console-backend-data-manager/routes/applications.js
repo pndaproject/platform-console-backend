@@ -179,13 +179,16 @@ router.post('/:id/:action', cors(corsOptions), function(req, res) {
         "/" + applicationId + "/" + action,
       method: "POST"
     };
-    HTTP.request(request).then(function success(response) {
-      logger.info("POST " + request.url + " successful: ", response.status);
-      res.sendStatus(response.status);
-    }, function error(err) {
-      logger.error("POST " + request.url + " failed: ", err.status);
-      res.sendStatus(err.status);
-    });
+    var statusRet = 500;
+    HTTP.request(request)
+         .then(function(response) {
+           logger.info(request.method, request.url, "success: ", response.status);
+           statusRet = response.status; return response.body.read();
+         }, function(error) {
+           logger.error(request.method, request.url, "error: ", error.status);
+           statusRet = error.status;
+         })
+         .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
   }
 });
 
@@ -210,13 +213,16 @@ router.delete('/:id', cors(), function(req, res) {
       url: config.deployment_manager.host + config.deployment_manager.API.applications + "/" + applicationId,
       method: "DELETE"
     };
-    HTTP.request(request).then(function success(response) {
-      logger.info("DELETE " + request.url + " successful: ", response.status);
-      res.sendStatus(response.status);
-    }, function error(error) {
-      logger.error("DELETE " + request.url + " failed: ", error.status);
-      res.sendStatus(error.status);
-    });
+    var statusRet = 500;
+    HTTP.request(request)
+         .then(function(response) {
+           logger.info(request.method, request.url, "success: ", response.status);
+           statusRet = response.status; return response.body.read();
+         }, function(error) {
+           logger.error(request.method, request.url, "error: ", error.status);
+           statusRet = error.status;
+         })
+         .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
   }
 });
 
@@ -248,13 +254,16 @@ router.put('/:id', cors(), function(req, res) {
       body: [body],
       headers: { "Content-Type": "application/json" }
     };
-    HTTP.request(request).then(function success(response) {
-      logger.info("PUT " + request.url + " successful: ", response.status);
-      res.sendStatus(response.status);
-    }, function error(error) {
-      logger.error("PUT " + request.url + " failed: ", error.status);
-      res.sendStatus(error.status);
-    });
+    var statusRet = 500;
+    HTTP.request(request)
+         .then(function(response) {
+           logger.info(request.method, request.url, "success: ", response.status);
+           statusRet = response.status; return response.body.read();
+         }, function(error) {
+           logger.error(request.method, request.url, "error: ", error.status);
+           statusRet = error.status;
+         })
+         .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
   }
 });
 

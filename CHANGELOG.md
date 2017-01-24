@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [0.3.0] 2017-01-20
+### Changed
+- PNDA-2499: The response body from the Deployment Manager is returned to the caller. Console will now display more helpful error messages.
+
 ## [0.2.3] 2016-12-12
 ### Changed
 - Externalized build logic from Jenkins to shell script so it can be reused
