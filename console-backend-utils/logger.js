@@ -39,7 +39,7 @@ var rotateTransport = new winstonlr.Rotate({
         compress: false
 });
 
-var winston = require('winston')
+var winston = require('winston');
 winston.emitErrs = true;
 
 var logger = new (winston.Logger)({ exitOnError: false, transports: [rotateTransport] });

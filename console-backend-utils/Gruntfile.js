@@ -1,7 +1,7 @@
 module.exports = function(grunt) {
 
   grunt.initConfig({
-    pkg: grunt.file.readJSON('package.json'),
+    pkg: grunt.file.readJSON('package-version.json'),
 
     jshint: {
       options: {
@@ -45,6 +45,18 @@ module.exports = function(grunt) {
       }
     },
 
+    compress: {
+      main: {
+        options: {
+          mode: 'tgz',
+          archive: '<%= pkg.name %>-<%= pkg.version %>.tar.gz'
+        },
+        expand: true,
+        src: ['MANIFEST', 'package.json', 'conf/*', 'routes/**', '*.js', 'node_modules/**'],
+        dest: '<%= pkg.name %>-<%= pkg.version %>'
+      }
+    },    
+    
     watch: {
       options: {
       },
@@ -56,6 +68,7 @@ module.exports = function(grunt) {
   });
 
   // Load dependencies
+  grunt.loadNpmTasks('grunt-contrib-compress');
   grunt.loadNpmTasks('grunt-contrib-jshint');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-jscs');
@@ -63,5 +76,6 @@ module.exports = function(grunt) {
 
   grunt.registerTask('default', ['js', 'jsdoc']);
   grunt.registerTask('js', ['jshint', 'jscs']);
+  grunt.registerTask('package', ['default', 'compress']);
 
 };
