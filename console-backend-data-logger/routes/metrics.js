@@ -23,64 +23,47 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-var express = require('express');
-var router = express.Router();
-var cors = require('cors');
-var graphite = require('graphite');
-var graphiteClient = graphite.createClient('plaintext://localhost:2003/');
+module.exports = function(express, async, logger, dbManager, cors, corsOptions){
 
-// dbManager
-var dbManager = require('../../console-backend-utils/dbManager');
+  var router = express.Router();
+  var graphite = require('graphite');
+  var graphiteClient = graphite.createClient('plaintext://localhost:2003/');
 
-// logger
-var logger = require("../../console-backend-utils/logger");
+  /* POST new metric. */
+  router.post('/', cors(corsOptions), function(req, res) {
+    if (req.body) {
+      async.each(req.body.data, function(item, callback) {
+        if (item.metric !== null && item.metric !== "") {
+          dbManager.create('metric:' + item.metric, item, 'platform-console-backend-metric-update', function(error) {
+            callback(error);
+          });
 
-// Async
-var async = require('async');
+          var metrics = {};
+          metrics[item.metric] = item.value;
+          logger.debug("Writing to graphite: " + JSON.stringify(metrics) + " " + item.timestamp);
+          graphiteClient.write(metrics, item.timestamp, function(err) {
+            if (err !== undefined) logger.error("Error writing to graphite: " + err);
+          });
+        } else {
+          // problem with the data we received in the create request - so flag an error for now
+          callback('Error - missing required data in metric body...');
+        }
+      }, function(err) {
+        if (err === null) {
+          logger.debug("Logged new metric data okay");
+          res.sendStatus(200);
+        } else {
+          logger.error("Failed to log new metric data: " + err);
+          res.sendStatus(500);
+        }
+      });
+    } else {
+      logger.error("Missing required metric params");
+      res.sendStatus(400);
+    }
 
-var hostname = process.env.HOSTNAME || 'localhost';
-var whitelist = ['http://' + hostname, 'http://' + hostname + ':8006', 'http://0.0.0.0:8006'];
+  });
 
-var corsOptions = {
-  origin: function(origin, callback) {
-    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
-    callback(null, originIsWhitelisted);
-  }
+  return router;
+
 };
-
-/* POST new metric. */
-router.post('/', cors(corsOptions), function(req, res) {
-  if (req.body) {
-    async.each(req.body.data, function(item, callback) {
-      if (item.metric !== null && item.metric !== "") {
-        dbManager.create('metric:' + item.metric, item, 'platform-console-backend-metric-update', function(error) {
-          callback(error);
-        });
-
-        var metrics = {};
-        metrics[item.metric] = item.value;
-        logger.debug("Writing to graphite: " + JSON.stringify(metrics) + " " + item.timestamp);
-        graphiteClient.write(metrics, item.timestamp, function(err) {
-          if (err !== undefined) logger.error("Error writing to graphite: " + err);
-        });
-      } else {
-        // problem with the data we received in the create request - so flag an error for now
-        callback('Error - missing required data in metric body...');
-      }
-    }, function(err) {
-      if (err === null) {
-        logger.debug("Logged new metric data okay");
-        res.sendStatus(200);
-      } else {
-        logger.error("Failed to log new metric data: " + err);
-        res.sendStatus(500);
-      }
-    });
-  } else {
-    logger.error("Missing required metric params");
-    res.sendStatus(400);
-  }
-
-});
-
-module.exports = router;

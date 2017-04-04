@@ -24,31 +24,35 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-var config = require('./conf/config.json');
-var winstonlr = require('winston-logrotate');
-var rotateTransport = new winstonlr.Rotate({
-        file: config.log_file,
-        colorize: false,
-        timestamp: true,
-        level: 'info',
-        handleExceptions: true,
-        humanReadableUnhandledException: true,
-        json: true,
-        size: '10m',
-        keep: 3,
-        compress: false
-});
+module.exports = function(conf_file){
 
-var winston = require('winston');
-winston.emitErrs = true;
+  var config = require(conf_file);
+  var winstonlr = require('winston-logrotate');
+  var rotateTransport = new winstonlr.Rotate({
+          file: config.log_file,
+          colorize: false,
+          timestamp: true,
+          level: config.log_level,
+          handleExceptions: true,
+          humanReadableUnhandledException: true,
+          json: true,
+          size: '10m',
+          keep: 3,
+          compress: false
+  });
 
-var logger = new (winston.Logger)({ exitOnError: false, transports: [rotateTransport] });
-logger.add(winston.transports.Console, {
-  level: 'debug',
-  timestamp: true,
-  handleExceptions: true,
-  json: false,
-  colorize: true
-});
+  var winston = require('winston');
+  winston.emitErrs = true;
 
-module.exports = logger;
+  var logger = new (winston.Logger)({ exitOnError: false, transports: [rotateTransport] });
+  logger.add(winston.transports.Console, {
+    level: config.log_level,
+    timestamp: true,
+    handleExceptions: true,
+    json: false,
+    colorize: true
+  });
+
+  return logger;
+
+};

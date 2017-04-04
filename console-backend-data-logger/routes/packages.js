@@ -23,55 +23,38 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-var express = require('express');
-var router = express.Router();
-var cors = require('cors');
+module.exports = function(express, async, logger, dbManager, cors, corsOptions){
 
-// dbManager
-var dbManager = require('../../console-backend-utils/dbManager');
+  var router = express.Router();
 
-// logger
-var logger = require("../../console-backend-utils/logger");
+  /* POST new package. */
+  router.post('/', cors(corsOptions), function(req, res) {
+    if (req.body) {
+      async.each(req.body.data, function(item, callback) {
+        if ((item.id !== null) && (item.id !== "")) {
+          dbManager.create('package:' + item.id, item, 'platform-console-backend-package-update', function(error) {
+            callback(error);
+          });
+        } else {
+          // problem with the data we received in the create request - so flag an error for now
+          callback('Error - missing required data in package body...');
+        }
+      }, function(err) {
+        if (err === null) {
+          logger.debug("Logged new package data okay");
+          res.sendStatus(200);
+        } else {
+          logger.error("Failed to log new package data: " + err);
+          res.sendStatus(500);
+        }
+      });
+    } else {
+      logger.error("Missing required package params");
+      res.sendStatus(400);
+    }
 
-// Async
-var async = require('async');
+  });
 
-var hostname = process.env.HOSTNAME || 'localhost';
-var whitelist = ['http://' + hostname, 'http://' + hostname + ':8006', 'http://0.0.0.0:8006'];
+  return router;
 
-var corsOptions = {
-  origin: function(origin, callback) {
-    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
-    callback(null, originIsWhitelisted);
-  }
 };
-
-/* POST new package. */
-router.post('/', cors(corsOptions), function(req, res) {
-  if (req.body) {
-    async.each(req.body.data, function(item, callback) {
-      if ((item.id !== null) && (item.id !== "")) {
-        dbManager.create('package:' + item.id, item, 'platform-console-backend-package-update', function(error) {
-          callback(error);
-        });
-      } else {
-        // problem with the data we received in the create request - so flag an error for now
-        callback('Error - missing required data in package body...');
-      }
-    }, function(err) {
-      if (err === null) {
-        logger.debug("Logged new package data okay");
-        res.sendStatus(200);
-      } else {
-        logger.error("Failed to log new package data: " + err);
-        res.sendStatus(500);
-      }
-    });
-  } else {
-    logger.error("Missing required package params");
-    res.sendStatus(400);
-  }
-
-});
-
-module.exports = router;

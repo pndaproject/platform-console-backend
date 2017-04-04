@@ -28,31 +28,29 @@ var express = require('express');
 var app = express();
 var http = require('http').Server(app);
 var io = require('socket.io')(http);
-var bodyParser = require('body-parser'),
-    path = require('path');
-
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-
-var routes = require('./routes/index');
-var metrics = require('./routes/metrics');
-var packages = require('./routes/packages');
-var applications = require('./routes/applications');
-var endpoints = require('./routes/endpoints');
-var datasets = require('./routes/datasets');
-var login = require('./routes/ldap_login');
-
-// Redis Client Support
+var bodyParser = require('body-parser');
+var path = require('path');
+var logger = require("../console-backend-utils/logger")('../console-backend-data-manager/conf/logger.json');
+var dbManager = require('../console-backend-utils/dbManager')(logger);
+var config = require('./conf/config');
+var cors = require('cors');
+var corsParameters = require("../console-backend-utils/corsParameters");
+var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist) };
+var Q = require('q');
+var HTTP = require("q-io/http");
+var routes = require('./routes/index')(express, logger, cors, corsOptions, config, Q, HTTP,dbManager);
+var metrics = require('./routes/metrics')(express, logger, cors, corsOptions, config, dbManager);
+var packages = require('./routes/packages')(express, logger, cors, corsOptions, config, Q, HTTP);
+var applications = require('./routes/applications')(express, logger, cors, corsOptions, config, Q, HTTP);
+var endpoints = require('./routes/endpoints')(express, logger, cors, corsOptions, config, Q, HTTP);
+var datasets = require('./routes/datasets')(express, logger, cors, corsOptions, config, Q, HTTP);
+var login = require('./routes/ldap_login')(express, logger);
 var redis = require('redis');
-
-// Logger
-var logger = require("../console-backend-utils/logger");
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: false }));
-
 var hostname = process.env.HOSTNAME || 'localhost';
 var port = parseInt(process.env.PORT, 10) || 3123;
+
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // Start simple http server
 http.listen(port, hostname);
@@ -60,25 +58,12 @@ http.listen(port, hostname);
 // Setup App routes
 app.use('/', routes); // simple response for getting current app version info etc if we want it
 
-// Metrics
 app.use('/metrics', metrics);
-
-// Applications
 app.use('/applications', applications);
-
-// Packages
 app.use('/packages', packages);
-
-// Endpoints
 app.use('/endpoints', endpoints);
-
-// Login
 app.use('/login', login);
-
-// Packages
 app.use('/datasets', datasets);
-
-// Docs
 app.use('/node_modules', express.static('node_modules'));
 app.use('/docs', express.static('docs'));
 

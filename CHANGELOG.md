@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Changed
+- PNDA-2682: review logging and routes
+
 ## [0.3.0] 2017-01-20
 ### Changed
 - PNDA-2499: The response body from the Deployment Manager is returned to the caller. Console will now display more helpful error messages.
