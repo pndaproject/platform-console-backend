@@ -19,7 +19,6 @@
     ],
     "disallowMixedSpacesAndTabs": true,
     "disallowTrailingWhitespace": "ignoreEmptyLines",
-//    "requireTrailingComma": { "ignoreSingleLine": true },
     "requireSpaceAfterComma": true,
     "disallowYodaConditions": true,
     "disallowKeywords": [ "with" ],
@@ -30,7 +29,6 @@
       "allExcept": ["require", "undefined"]
     },
     "disallowSpaceBeforeComma": true,
-//    "disallowSpaceBeforeSemicolon": true,
     "disallowSpacesInsideTemplateStringPlaceholders": true,
     "disallowArrayDestructuringReturn": true,
     "requireSpaceBeforeBlockStatements": true,
@@ -44,7 +42,6 @@
     "requireCommaBeforeLineBreak": true,
     "requireSpaceBeforeBinaryOperators": true,
     "requireSpaceAfterBinaryOperators": true,
-    "requireCamelCaseOrUpperCaseIdentifiers": { "ignoreProperties": true },
     "requireDollarBeforejQueryAssignment": true,
     "requireLineFeedAtFileEnd": true,
     "requireCapitalizedConstructors": {
@@ -78,10 +75,8 @@
     },
     "requireSemicolons": true,
     "requireShorthandArrowFunctions": true,
-//    "requireSpacesInsideImportedObjectBraces": true,
     "safeContextKeyword": "_this",
     "validateLineBreaks": "LF",
-//    "validateQuoteMarks": { "mark": "'", "escape": true, "ignoreJSX": true },
     "validateIndentation": {
       "value": 2,
       "allExcept": ["comments"]

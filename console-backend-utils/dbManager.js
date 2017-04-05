@@ -27,9 +27,6 @@
 var redis = require('redis');
 var redisClient = redis.createClient();
 
-// logger
-var logger = require("./logger");
-
 function stripRedisDataIdentifiers(responseArray) {
     // Strip-out the prefix data identifier (e.g. 'metric:' etc.) as client doesn't need to care
     // about it and is an artifact of how we are storing data in redis.
@@ -44,68 +41,72 @@ function stripRedisDataIdentifiers(responseArray) {
   return responseArray;
 }
 
-module.exports = {
+module.exports = function(logger){
+
+  return {
 
     // Create new data in our chosen store
-  create: function (id, data, notification, callback) {
-    if ((id) && (data)) {
-      redisClient.hmset(id, data,
-                function(err) {
-                    //console.log(reply);
-                  if (!err) {
-                    logger.debug("Created new data: " + id + " : ", data);
+    create: function (id, data, notification, callback) {
+      if ((id) && (data)) {
+        redisClient.hmset(id, data,
+                  function(err) {
+                      //console.log(reply);
+                    if (!err) {
+                      logger.debug("Created new data: " + id + " : ", data);
 
-                    if (notification) {
-                        // Pack up our data in to a serialized object for messaging to our backend subscriber which
-                        // shall parse and then do what it needs to over it frontend interface when ready.
-                        // NOTE: We are reusing a single channel for redis pub/sub messaging - it's up to the client
-                        // frontend to filter what messages it cares about updating.
-                        // Update: now sending the whole object without filtering first
-                      redisClient.publish(notification, JSON.stringify(data));
+                      if (notification) {
+                          // Pack up our data in to a serialized object for messaging to our backend subscriber which
+                          // shall parse and then do what it needs to over it frontend interface when ready.
+                          // NOTE: We are reusing a single channel for redis pub/sub messaging - it's up to the client
+                          // frontend to filter what messages it cares about updating.
+                          // Update: now sending the whole object without filtering first
+                        redisClient.publish(notification, JSON.stringify(data));
+                      }
                     }
-                  }
 
-                  callback(err);
-                });
-    } else {
-      logger.error("Failed to create new data - missing required params...");
-    }
-  },
-
-  getAllKeys: function (req, stripPrefix, callback) {
-    var param = "*";
-    if ((req !== "") && (req !== null)) {
-      param = req;
-    }
-
-    logger.debug('Attempting to get ' + param);
-
-    redisClient.keys(param, function(err, reply) {
-      if (err) {
-          // One of the iterations produced an error.
-          // All processing will now stop.
-        logger.error('data store retrieve request failed: ' + err);
+                    callback(err);
+                  });
       } else {
-        logger.debug('data store retrieve request processed successfully - ' + reply);
+        logger.error("Failed to create new data - missing required params...");
+      }
+    },
+
+    getAllKeys: function (req, stripPrefix, callback) {
+      var param = "*";
+      if ((req !== "") && (req !== null)) {
+        param = req;
       }
 
-      // only strip the prefix if required to do so...some callers want to see all data as stored
-      callback(err, (stripPrefix === true ? stripRedisDataIdentifiers(reply) : reply));
-    });
-  },
+      logger.debug('Attempting to get ' + param);
 
-  getKeyValuesForFields: function (key, fields, callback) {
-    redisClient.hmget(key, fields, function(err, reply) {
-      if (err) {
-          // One of the iterations produced an error.
-          // All processing will now stop.
-        logger.error('data store retrieve request failed: ' + err);
-      } else {
-        logger.debug('data store retrieve request processed successfully - ' + reply);
-      }
+      redisClient.keys(param, function(err, reply) {
+        if (err) {
+            // One of the iterations produced an error.
+            // All processing will now stop.
+          logger.error('data store retrieve request failed: ' + err);
+        } else {
+          logger.debug('data store retrieve request processed successfully - ' + reply);
+        }
 
-      callback(err, reply);
-    });
-  }
+        // only strip the prefix if required to do so...some callers want to see all data as stored
+        callback(err, (stripPrefix === true ? stripRedisDataIdentifiers(reply) : reply));
+      });
+    },
+
+    getKeyValuesForFields: function (key, fields, callback) {
+      redisClient.hmget(key, fields, function(err, reply) {
+        if (err) {
+            // One of the iterations produced an error.
+            // All processing will now stop.
+          logger.error('data store retrieve request failed: ' + err);
+        } else {
+          logger.debug('data store retrieve request processed successfully - ' + reply);
+        }
+
+        callback(err, reply);
+      });
+    }
+
+  };
 
 };

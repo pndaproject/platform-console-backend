@@ -24,59 +24,54 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-var express = require('express');
-var router = express.Router();
-var cors = require('cors');
+module.exports = function(express, logger, cors, corsOptions, config, dbManager){
 
-var dbManager = require('../../console-backend-utils/dbManager');
-var logger = require("../../console-backend-utils/logger");
-var corsParameters = require("../../console-backend-utils/corsParameters");
-var config = require('../conf/config');
+  var router = express.Router();
 
-var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist) };
-
-/* GET metrics listing. */
-router.get('/', cors(corsOptions), function(req, res) {
-  dbManager.getAllKeys('metric:*', true, function(error, response) {
-    if (error) {
-      logger.error("failed to get keys - " + error);
-      res.json({ error: error });
-    } else {
-      res.json({ metrics: response });
-    }
-  });
-});
-
-/* GET metrics listing. */
-router.get('/:id', cors(corsOptions), function(req, res) {
-  var key = req.params.id;
-  var fields = ['source', 'value', 'timestamp'];
-
-  // if we are dealing with a health-related metric then add it in to our search criteria...
-  if (key.indexOf('.health') > 0) {
-    fields.push('causes');
-  }
-
-  if (key !== "") {
-    dbManager.getKeyValuesForFields('metric:' + key, fields, function(error, response) {
+  /* GET metrics listing. */
+  router.get('/', cors(corsOptions), function(req, res) {
+    dbManager.getAllKeys('metric:*', true, function(error, response) {
       if (error) {
         logger.error("failed to get keys - " + error);
         res.json({ error: error });
       } else {
-        // var source = response[0], value = response[1]/*, timestamp = response[2]*/;
-        var json = { metric: key, currentData: {} };
-        for (var i = 0 ; i < fields.length ; i++) {
-          json.currentData[fields[i]] = response[i];
-        }
-
-        res.json(json);
+        res.json({ metrics: response });
       }
     });
-  } else {
-    var error = "Missing required key param for metrics";
-    logger.error(error);
-    res.json({ error: error });
-  }
-});
+  });
 
-module.exports = router;
+  /* GET metrics listing. */
+  router.get('/:id', cors(corsOptions), function(req, res) {
+    var key = req.params.id;
+    var fields = ['source', 'value', 'timestamp'];
+
+    // if we are dealing with a health-related metric then add it in to our search criteria...
+    if (key.indexOf('.health') > 0) {
+      fields.push('causes');
+    }
+
+    if (key !== "") {
+      dbManager.getKeyValuesForFields('metric:' + key, fields, function(error, response) {
+        if (error) {
+          logger.error("failed to get keys - " + error);
+          res.json({ error: error });
+        } else {
+          // var source = response[0], value = response[1]/*, timestamp = response[2]*/;
+          var json = { metric: key, currentData: {} };
+          for (var i = 0 ; i < fields.length ; i++) {
+            json.currentData[fields[i]] = response[i];
+          }
+
+          res.json(json);
+        }
+      });
+    } else {
+      var error = "Missing required key param for metrics";
+      logger.error(error);
+      res.json({ error: error });
+    }
+  });
+
+  return router;
+
+};
