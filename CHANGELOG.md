@@ -1,9 +1,14 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-## [Unreleased]
+## [0.4.0] 2017-05-23
+### Added
+- PNDA-2691: Allow offline installation
+- PNDA-2374: Pin down specific dependencies
 ### Changed
 - PNDA-2682: review logging and routes
+### Fixed
+- PNDA-2785: Pin compress to 1.3.0
 
 ## [0.3.0] 2017-01-20
 ### Changed
