@@ -27,44 +27,41 @@
 *-------------------------------------------------------------------------------*/
 
 var express = require('express');
+var async = require('async');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var logger = require("../console-backend-utils/logger");
-
-// Route for taking PNDA metric notifications...
-var metrics = require('./routes/metrics');
-
-// Route for taking PNDA package notifications...
-var packages = require('./routes/packages');
-
-// Route for taking PNDA application notifications...
-var applications = require('./routes/applications');
-
+var logger = require("../console-backend-utils/logger")('../console-backend-data-logger/conf/logger.json');
+var dbManager = require('../console-backend-utils/dbManager')(logger);
+var cors = require('cors');
+var hostname = process.env.HOSTNAME || 'localhost';
+var whitelist = ['http://' + hostname, 'http://' + hostname + ':8006', 'http://0.0.0.0:8006'];
+var corsOptions = {
+  origin: function(origin, callback) {
+    var originIsWhitelisted = whitelist.indexOf(origin) !== -1;
+    callback(null, originIsWhitelisted);
+  }
+};
+var metrics = require('./routes/metrics')(express, async, logger, dbManager,cors, corsOptions);
+var packages = require('./routes/packages')(express, async, logger, dbManager,cors, corsOptions);
+var applications = require('./routes/applications')(express, async, logger, dbManager,cors, corsOptions);
 var app = express();
+var cors = require('cors');
+var port = parseInt(process.env.PORT, 10) || 3001;
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
-var cors = require('cors');
-
-// enable cors in Express
 app.use(cors());
 
 // Enable reading of node app params to allow us to bind to different ip addresses or port
-var hostname = process.env.HOSTNAME || 'localhost';
-var port = parseInt(process.env.PORT, 10) || 3001;
 app.listen(port, hostname);
 
-// Route definition
+// Routes definition
 app.use('/metrics', metrics);
 app.use('/packages', packages);
 app.use('/applications', applications);
-
-// Docs
 app.use('/node_modules', express.static('node_modules'));
 app.use('/docs', express.static('docs'));
 

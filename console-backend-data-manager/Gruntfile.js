@@ -69,7 +69,7 @@ module.exports = function(grunt) {
           archive: '<%= pkg.name %>-<%= pkg.version %>.tar.gz'
         },
         expand: true,
-        src: ['console-backend-utils/**', 'MANIFEST', 'package.json', 'conf/*', 'routes/**', '*.js'],
+        src: ['MANIFEST', 'package.json', 'conf/*', 'routes/**', '*.js', 'node_modules/**'],
         dest: '<%= pkg.name %>-<%= pkg.version %>'
       }
     },

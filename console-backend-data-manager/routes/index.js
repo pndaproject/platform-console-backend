@@ -23,27 +23,21 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-var express = require('express');
-var router = express.Router();
+module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, dbManager){
 
-var cors = require('cors');
+	var router = express.Router();
 
-var dbManager = require('../../console-backend-utils/dbManager');
-var logger = require("../../console-backend-utils/logger");
-var corsParameters = require("../../console-backend-utils/corsParameters");
-var config = require('../conf/config');
+	/* GET all data listings regardless of type. */
+	router.get('/', cors(corsOptions), function(req, res) {
+	  dbManager.getAllKeys('*', false, function(error, response) {
+	    if (error) {
+	      logger.error("failed to get keys - " + error);
+	      res.json({ error: error });
+	    } else {
+	      res.json({ data: response });
+	    }
+	  });
+	});
 
-var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist) };
-
-/* GET all data listings regardless of type. */
-router.get('/', cors(corsOptions), function(req, res) {
-  dbManager.getAllKeys('*', false, function(error, response) {
-    if (error) {
-      logger.error("failed to get keys - " + error);
-      res.json({ error: error });
-    } else {
-      res.json({ data: response });
-    }
-  });
-});
-module.exports = router;
+	return router;
+};

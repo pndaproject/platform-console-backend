@@ -25,202 +25,21 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-var express = require('express');
-var router = express.Router();
-var cors = require('cors');
+module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
 
-var Q = require('q');
-var HTTP = require("q-io/http");
+  var router = express.Router();
 
-var logger = require("../../console-backend-utils/logger");
-var corsParameters = require("../../console-backend-utils/corsParameters");
-var config = require('../conf/config');
-
-var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist) };
-
-function getAvailablePackages() {
-  var deferred = Q.defer();
-  var packagesAvailable = config.deployment_manager.host + config.deployment_manager.API.packages_available;
-  logger.info("get packages available:", packagesAvailable);
-  HTTP.request({ url: packagesAvailable }).then(function successCallback(res) {
-    return res.body.read().then(function(bodyStream) {
-      var body = bodyStream.toString('UTF-8');
-      return deferred.resolve(body);
-    });
-  }, function errorCallback(error) {
-    logger.error("packages available error response", error);
-
-    // called asynchronously if an error occurs
-    // or server returns response with an error status.
-    deferred.reject('error ' + error);
-  });
-
-  return deferred.promise;
-}
-
-function getPackageStatus(id) {
-  var deferred = Q.defer();
-  var url = config.deployment_manager.host + config.deployment_manager.API.packages + "/" + id + "/status";
-  logger.debug("get package status:", url);
-  HTTP.request({ url: url }).then(function successCallback(res) {
-    return res.body.read().then(function(bodyStream) {
-      var body = bodyStream.toString('UTF-8');
-      return deferred.resolve(body);
-    });
-  }, function errorCallback(error) {
-    logger.error("get package status details error response", error);
-    deferred.reject('error ' + error);
-  });
-
-  return deferred.promise;
-}
-
-function getDeployedPackages() {
-  var deferred = Q.defer();
-  var deployed = config.deployment_manager.host + config.deployment_manager.API.packages;
-  logger.info("get deployed packages:", deployed);
-  HTTP.request({ url: deployed }).then(function successCallback(res) {
-    return res.body.read().then(function(bodyStream) {
-      var body = bodyStream.toString('UTF-8');
-      return deferred.resolve(body);
-    });
-  }, function errorCallback(error) {
-    logger.error("deployed packages error response", error);
-
-    // called asynchronously if an error occurs
-    // or server returns response with an error status.
-    deferred.reject('error ' + error);
-  });
-
-  return deferred.promise;
-}
-
-/* Get a list of packages available and deployed. */
-router.get('/', cors(corsOptions), function(req, res) {
-  var promise = Q.all([getAvailablePackages(), getDeployedPackages()]);
-  promise.then(function(results) {
-    var packages = [];
-    try {
-      var available = JSON.parse(results[0]);
-      available.forEach(function(p) {
-        var newPackage = {
-          name: p.name,
-          available_versions: [],
-          deployed_versions: []
-        };
-        p.latest_versions.forEach(function(version) {
-          newPackage.available_versions.push({
-            version: version.version,
-            status: "NOTDEPLOYED"
-          });
-        });
-        packages.push(newPackage);
-      });
-    }
-    catch (e) {
-      logger.error("available packages - invalid results", results[0], e);
-    }
-
-    try {
-      var deployed = JSON.parse(results[1]);
-
-      var findPackageByName = function(name) {
-        var found;
-        for (var j = 0 ; j < packages.length ; j++) {
-          if (packages[j].name === name) {
-            found = packages[j];
-            break;
-          }
-        }
-
-        return found;
-      };
-
-      for (var i = 0 ; i < deployed.length ; i++) {
-        var p = deployed[i];
-        var match;
-        if ((match = p.match(/^(.*)-([\d\.]*)$/i)) !== null) {
-          var packageName = match[1];
-          var version = match[2];
-          var found = findPackageByName(packageName);
-          logger.debug("found", found);
-          if (found !== undefined) {
-            for (var v = 0 ; v < found.available_versions.length ; v++) {
-              if (found.available_versions[v].version === version) {
-                found.available_versions[v].status = "DEPLOYED";
-              }
-            }
-
-            found.deployed_versions.push(version);
-          } else {
-            packages.push({
-              name: packageName,
-              available_versions: [{
-                version: version,
-                status: "DEPLOYED"
-              }],
-              deployed_versions: [version]
-            });
-          }
-        } else {
-          logger.warn("Deployed package", p, "does not match name-version pattern");
-        }
-      }
-    }
-    catch (e) {
-      logger.error("deployed packages - invalid results", results[1], e);
-    }
-
-    res.json({ packages: packages });
-  });
-});
-
-/* Get a list of deployed packages. */
-router.get('/deployed', cors(corsOptions), function(req, res) {
-  var promise = Q.all([getDeployedPackages()]);
-  promise.then(function(results) {
-    var packages = [];
-    try {
-      packages = JSON.parse(results[0]);
-    }
-    catch (e) {
-      logger.error("deployed packages - invalid results", results[0], e);
-    }
-
-    res.json({ deployedPackages: packages });
-  });
-});
-
-/* GET Package status by id. */
-router.get('/:id/status', cors(corsOptions), function(req, res) {
-  var id = req.params.id;
-  var promise = Q.all([getPackageStatus(id)]);
-  promise.then(function(results) {
-    var details = {};
-    try {
-      details = JSON.parse(results[0]);
-      logger.info(results);
-    } catch (e) {
-      logger.error("invalid results", results[0]);
-    }
-
-    res.json(details);
-  });
-});
-
-/* Get package information by id. */
-router.get('/:id', cors(corsOptions), function(req, res) {
-  var getPackagesDetails = function(id) {
+  function getAvailablePackages() {
     var deferred = Q.defer();
-    var url = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + id;
-    logger.info("getPackageDetails:", url);
-    HTTP.request({ url: url }).then(function successCallback(res) {
+    var packagesAvailable = config.deployment_manager.host + config.deployment_manager.API.packages_available;
+    logger.info("get packages available:", packagesAvailable);
+    HTTP.request({ url: packagesAvailable }).then(function successCallback(res) {
       return res.body.read().then(function(bodyStream) {
         var body = bodyStream.toString('UTF-8');
         return deferred.resolve(body);
       });
     }, function errorCallback(error) {
-      logger.error("packages details error response", error);
+      logger.error("packages available error response", error);
 
       // called asynchronously if an error occurs
       // or server returns response with an error status.
@@ -228,96 +47,270 @@ router.get('/:id', cors(corsOptions), function(req, res) {
     });
 
     return deferred.promise;
-  };
+  }
 
-  var promise = Q.all([getPackagesDetails(req.params.id)]);
-  promise.then(function(results) {
-    var details = "";
-    try {
-      details = JSON.parse(results[0]);
-    }
-    catch (e) {
-      logger.error("invalid results", results[0]);
-    }
+  function getPackageStatus(id) {
+    var deferred = Q.defer();
+    var url = config.deployment_manager.host + config.deployment_manager.API.packages + "/" + id + "/status";
+    logger.debug("get package status:", url);
+    HTTP.request({ url: url }).then(function successCallback(res) {
+      return res.body.read().then(function(bodyStream) {
+        var body = bodyStream.toString('UTF-8');
+        return deferred.resolve(body);
+      });
+    }, function errorCallback(error) {
+      logger.error("get package status details error response", error);
+      deferred.reject('error ' + error);
+    });
 
-    res.json(details);
+    return deferred.promise;
+  }
+
+  function getDeployedPackages() {
+    var deferred = Q.defer();
+    var deployed = config.deployment_manager.host + config.deployment_manager.API.packages;
+    logger.info("get deployed packages:", deployed);
+    HTTP.request({ url: deployed }).then(function successCallback(res) {
+      return res.body.read().then(function(bodyStream) {
+        var body = bodyStream.toString('UTF-8');
+        return deferred.resolve(body);
+      });
+    }, function errorCallback(error) {
+      logger.error("deployed packages error response", error);
+
+      // called asynchronously if an error occurs
+      // or server returns response with an error status.
+      deferred.reject('error ' + error);
+    });
+
+    return deferred.promise;
+  }
+
+  /* Get a list of packages available and deployed. */
+  router.get('/', cors(corsOptions), function(req, res) {
+    var promise = Q.all([getAvailablePackages(), getDeployedPackages()]);
+    promise.then(function(results) {
+      var packages = [];
+      try {
+        var available = JSON.parse(results[0]);
+        available.forEach(function(p) {
+          var newPackage = {
+            name: p.name,
+            available_versions: [],
+            deployed_versions: []
+          };
+          p.latest_versions.forEach(function(version) {
+            newPackage.available_versions.push({
+              version: version.version,
+              status: "NOTDEPLOYED"
+            });
+          });
+          packages.push(newPackage);
+        });
+      }
+      catch (e) {
+        logger.error("available packages - invalid results", results[0], e);
+      }
+
+      try {
+        var deployed = JSON.parse(results[1]);
+
+        var findPackageByName = function(name) {
+          var found;
+          for (var j = 0 ; j < packages.length ; j++) {
+            if (packages[j].name === name) {
+              found = packages[j];
+              break;
+            }
+          }
+
+          return found;
+        };
+
+        for (var i = 0 ; i < deployed.length ; i++) {
+          var p = deployed[i];
+          var match;
+          if ((match = p.match(/^(.*)-([\d\.]*)$/i)) !== null) {
+            var packageName = match[1];
+            var version = match[2];
+            var found = findPackageByName(packageName);
+            logger.debug("found", found);
+            if (found !== undefined) {
+              for (var v = 0 ; v < found.available_versions.length ; v++) {
+                if (found.available_versions[v].version === version) {
+                  found.available_versions[v].status = "DEPLOYED";
+                }
+              }
+
+              found.deployed_versions.push(version);
+            } else {
+              packages.push({
+                name: packageName,
+                available_versions: [{
+                  version: version,
+                  status: "DEPLOYED"
+                }],
+                deployed_versions: [version]
+              });
+            }
+          } else {
+            logger.warn("Deployed package", p, "does not match name-version pattern");
+          }
+        }
+      }
+      catch (e) {
+        logger.error("deployed packages - invalid results", results[1], e);
+      }
+
+      res.json({ packages: packages });
+    });
   });
-});
 
-/**
- * Deploy a package
- *
- * @param id  package ID
- * @return 202 accepted
- * @return 404 package not deployed in repository
- * @return 409 package already deployed
- * @return 500 server error
- */
-router.options('/:id', cors()); // enable pre-flight request for PUT request
-router.put('/:id', cors(), function(req, res) {
-  var packageId = req.params.id;
-  var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
-  logger.debug("packageId", packageId);
+  /* Get a list of deployed packages. */
+  router.get('/deployed', cors(corsOptions), function(req, res) {
+    var promise = Q.all([getDeployedPackages()]);
+    promise.then(function(results) {
+      var packages = [];
+      try {
+        packages = JSON.parse(results[0]);
+      }
+      catch (e) {
+        logger.error("deployed packages - invalid results", results[0], e);
+      }
 
-  if (packageId && packageId !== "") {
-    logger.info("Deploying package " + packageId + " to " + req.body.action);
+      res.json({ deployedPackages: packages });
+    });
+  });
 
-    var request = {
-      url: deployAPI,
-      method: "PUT"
+  /* GET Package status by id. */
+  router.get('/:id/status', cors(corsOptions), function(req, res) {
+    var id = req.params.id;
+    var promise = Q.all([getPackageStatus(id)]);
+    promise.then(function(results) {
+      var details = {};
+      try {
+        details = JSON.parse(results[0]);
+        logger.info(results);
+      } catch (e) {
+        logger.error("invalid results", results[0]);
+      }
+
+      res.json(details);
+    });
+  });
+
+  /* Get package information by id. */
+  router.get('/:id', cors(corsOptions), function(req, res) {
+    var getPackagesDetails = function(id) {
+      var deferred = Q.defer();
+      var url = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + id;
+      logger.info("getPackageDetails:", url);
+      HTTP.request({ url: url }).then(function successCallback(res) {
+        return res.body.read().then(function(bodyStream) {
+          var body = bodyStream.toString('UTF-8');
+          return deferred.resolve(body);
+        });
+      }, function errorCallback(error) {
+        logger.error("packages details error response", error);
+
+        // called asynchronously if an error occurs
+        // or server returns response with an error status.
+        deferred.reject('error ' + error);
+      });
+
+      return deferred.promise;
     };
-    logger.debug('deploy API call:', request.method, deployAPI);
-    var statusRet = 500;
-    HTTP.request(request)
-         .then(function(response) {
-           logger.info(request.method, request.url, "success: ", response.status);
-           statusRet = response.status; return response.body.read();
-         }, function(error) {
-           logger.error(request.method, request.url, "error: ", error.status);
-           statusRet = error.status;
-         })
-         .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
-  } else {
-    logger.error("Missing required package id to deploy the package");
-    res.sendStatus(500);
-  }
-});
 
-/**
- * Undeploy a package
- *
- * @param id  package ID
- * @return 202 accepted
- * @return 404 package not deployed
- * @return 500 server error
- */
-router.options('/:id', cors()); // enable pre-flight request for DELETE request
-router.delete('/:id', cors(), function(req, res) {
-  var packageId = req.params.id;
-  var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
+    var promise = Q.all([getPackagesDetails(req.params.id)]);
+    promise.then(function(results) {
+      var details = "";
+      try {
+        details = JSON.parse(results[0]);
+      }
+      catch (e) {
+        logger.error("invalid results", results[0]);
+      }
 
-  if (packageId && packageId !== "") {
-    logger.info("Undeploying package " + packageId + " to " + req.body.action);
+      res.json(details);
+    });
+  });
 
-    var request = {
-      url: deployAPI,
-      method: "DELETE"
-    };
-    logger.debug('undeploy API call:', request.method, deployAPI);
-    var statusRet = 500;
-    HTTP.request(request)
-         .then(function(response) {
-           logger.info(request.method, request.url, "success: ", response.status);
-           statusRet = response.status; return response.body.read();
-         }, function(error) {
-           logger.error(request.method, request.url, "error: ", error.status);
-           statusRet = error.status;
-         })
-         .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
-  } else {
-    logger.error("Missing required package id to undeploy the package");
-    res.sendStatus(500);
-  }
-});
+  /**
+   * Deploy a package
+   *
+   * @param id  package ID
+   * @return 202 accepted
+   * @return 404 package not deployed in repository
+   * @return 409 package already deployed
+   * @return 500 server error
+   */
+  router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
+  router.put('/:id', cors(corsOptions), function(req, res) {
+    var packageId = req.params.id;
+    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
+    logger.debug("packageId", packageId);
 
-module.exports = router;
+    if (packageId && packageId !== "") {
+      logger.info("Deploying package " + packageId + " to " + req.body.action);
+
+      var request = {
+        url: deployAPI,
+        method: "PUT"
+      };
+      logger.debug('deploy API call:', request.method, deployAPI);
+      var statusRet = 500;
+      HTTP.request(request)
+           .then(function(response) {
+             logger.info(request.method, request.url, "success: ", response.status);
+             statusRet = response.status; return response.body.read();
+           }, function(error) {
+             logger.error(request.method, request.url, "error: ", error.status);
+             statusRet = error.status;
+           })
+           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+    } else {
+      logger.error("Missing required package id to deploy the package");
+      res.sendStatus(500);
+    }
+  });
+
+  /**
+   * Undeploy a package
+   *
+   * @param id  package ID
+   * @return 202 accepted
+   * @return 404 package not deployed
+   * @return 500 server error
+   */
+  router.options('/:id', cors(corsOptions)); // enable pre-flight request for DELETE request
+  router.delete('/:id', cors(corsOptions), function(req, res) {
+    var packageId = req.params.id;
+    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
+
+    if (packageId && packageId !== "") {
+      logger.info("Undeploying package " + packageId + " to " + req.body.action);
+
+      var request = {
+        url: deployAPI,
+        method: "DELETE"
+      };
+      logger.debug('undeploy API call:', request.method, deployAPI);
+      var statusRet = 500;
+      HTTP.request(request)
+           .then(function(response) {
+             logger.info(request.method, request.url, "success: ", response.status);
+             statusRet = response.status; return response.body.read();
+           }, function(error) {
+             logger.error(request.method, request.url, "error: ", error.status);
+             statusRet = error.status;
+           })
+           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+    } else {
+      logger.error("Missing required package id to undeploy the package");
+      res.sendStatus(500);
+    }
+  });
+
+  return router;
+  
+};
