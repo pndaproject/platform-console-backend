@@ -4,6 +4,7 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Changed
 - PNDA-2682: review logging and routes
+- PNDA-3086: Only send notifications for metrics when they change (except health metrics)
 
 ### Fixed
 - PNDA-3086: Load metrics in a single http get to fix performance issue.

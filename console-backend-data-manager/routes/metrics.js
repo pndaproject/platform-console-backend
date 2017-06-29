@@ -40,7 +40,7 @@ module.exports = function(express, logger, cors, corsOptions, config, dbManager)
           }
         });
     } else {
-      dbManager.getAllKeysAndValues('metric:*', true, function(error, response) {
+      dbManager.getAllMetricKeysAndValues(function(error, response) {
           if (error) {
             logger.error("failed to get keys and values - " + error);
             res.json({ error: error });

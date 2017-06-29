@@ -49,25 +49,37 @@ module.exports = function(logger) {
 
     // Create new data in our chosen store
     create: function (id, data, notification, callback) {
+
+       function setAndPublish(id, data, notification, callback) {
+         redisClient.hmset(id, data, function(err) {
+           if (!err) {
+             logger.debug("Created new data: " + id + " : ", data);
+
+             if (notification) {
+                 // Pack up our data in to a serialized object for messaging to our backend subscriber which
+                 // shall parse and then do what it needs to over it frontend interface when ready.
+                 // NOTE: We are reusing a single channel for redis pub/sub messaging - it's up to the client
+                 // frontend to filter what messages it cares about updating.
+                 // Update: now sending the whole object without filtering first
+               redisClient.publish(notification, JSON.stringify(data));
+             }
+           }
+
+           callback(err);
+         });
+       }
+
       if ((id) && (data)) {
-        redisClient.hmset(id, data,
-                  function(err) {
-                      //console.log(reply);
-                    if (!err) {
-                      logger.debug("Created new data: " + id + " : ", data);
-
-                      if (notification) {
-                          // Pack up our data in to a serialized object for messaging to our backend subscriber which
-                          // shall parse and then do what it needs to over it frontend interface when ready.
-                          // NOTE: We are reusing a single channel for redis pub/sub messaging - it's up to the client
-                          // frontend to filter what messages it cares about updating.
-                          // Update: now sending the whole object without filtering first
-                        redisClient.publish(notification, JSON.stringify(data));
-                      }
-                    }
-
-                    callback(err);
-                  });
+        if (notification && id.indexOf('metric:') >= 0 && id.indexOf('.health') <= 0) {
+          redisClient.hmget(id, ['value'], function(err, reply) {
+                if (reply[0] === data.value) {
+                  notification = false;
+                }
+                setAndPublish(id, data, notification, callback);
+              });
+        } else {
+          setAndPublish(id, data, notification, callback);
+        }
       } else {
         logger.error("Failed to create new data - missing required params...");
       }
@@ -95,11 +107,8 @@ module.exports = function(logger) {
       });
     },
 
-    getAllKeysAndValues: function (req, stripPrefix, callback) {
-      var param = "*";
-      if ((req !== "") && (req !== null)) {
-        param = req;
-      }
+    getAllMetricKeysAndValues: function (callback) {
+      var param = 'metric:*';
 
       logger.debug('Attempting to get all keys and values ' + param);
 
