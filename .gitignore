@@ -3,3 +3,4 @@
 node_modules
 *.log
 pnda-build/
+doc

@@ -24,23 +24,34 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, dbManager){
+module.exports = function(express, logger, cors, corsOptions, config, dbManager) {
 
   var router = express.Router();
 
-  /* GET metrics listing. */
+  /* GET all metric keys and optionally values too */
   router.get('/', cors(corsOptions), function(req, res) {
-    dbManager.getAllKeys('metric:*', true, function(error, response) {
-      if (error) {
-        logger.error("failed to get keys - " + error);
-        res.json({ error: error });
-      } else {
-        res.json({ metrics: response });
-      }
-    });
+    if (!req.param('values')) {
+      dbManager.getAllKeys('metric:*', true, function(error, response) {
+          if (error) {
+            logger.error("failed to get keys - " + error);
+            res.json({ error: error });
+          } else {
+            res.json({ metrics: response });
+          }
+        });
+    } else {
+      dbManager.getAllMetricKeysAndValues(function(error, response) {
+          if (error) {
+            logger.error("failed to get keys and values - " + error);
+            res.json({ error: error });
+          } else {
+            res.json({ metrics: response });
+          }
+        });
+    }
   });
 
-  /* GET metrics listing. */
+  /* GET single metric value */
   router.get('/:id', cors(corsOptions), function(req, res) {
     var key = req.params.id;
     var fields = ['source', 'value', 'timestamp'];
