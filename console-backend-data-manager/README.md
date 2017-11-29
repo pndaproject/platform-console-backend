@@ -2,7 +2,7 @@
 
 The platform-console-data-manager project contains a Node.js app that provides a number of services for the platform-console-frontend web app via a REST API interface. In many cases, the backend simply provides a wrapper for REST APIs from other services.
 
-By default, the data manager runs on port 3123. 
+By default, the data manager runs on port 3123.
 
 For an interactive Swagger API console, see __/docs__.
 
@@ -37,10 +37,10 @@ For some Frisby unit tests, see __/tests__.
 
 ## Packages API
 
-The packages API lets you see what software packages are available for deployment in the cluster. You can deploy packages, which turns them into applications. 
+The packages API lets you see what software packages are available for deployment in the cluster. You can deploy packages, which turns them into applications.
 
 ### List all packages
-````    
+````
 GET /packages
 
 Response Codes:
@@ -122,7 +122,7 @@ Response Codes:
 
 ## Applications API
 
-The applications API lets you see what applications are available in the cluster. You can start, stop, and delete applications. 
+The applications API lets you see what applications are available in the cluster. You can start, stop, and delete applications.
 
 ### List all applications
 ````
@@ -181,7 +181,7 @@ Response Codes:
 
 {
         "status": "STARTED",
-        "name": "mini-mouse-masher",
+        "name": "application-name",
         "yarn-ids": [
             {"component":"example", "type":"oozie", "yarn-id":"application_1455877292606_0404"}
         ]
@@ -227,6 +227,7 @@ Example response:
 			}
 		}
 	},
+	"user": "somebody",
 	"package_name": "spark-batch-example-app-1.0.23",
 	"name": "spark-batch-example-app-instance",
 	"defaults": {
@@ -251,6 +252,7 @@ Example response:
 ````
 PUT /applications/<application>
 {
+	"user": "<username>",
 	"package": "<package>",
 	"<componentType>": {
 		"<componentName>": {
@@ -268,6 +270,7 @@ Response Codes:
 
 Example body:
 {
+	"user": "somebody",
 	"package": "<package>",
 	"oozie": {
 		"example": {
@@ -276,7 +279,7 @@ Example body:
 	}
 }
 
-Package is mandatory, property settings are optional
+Package and user are mandatory, property settings are optional
 ````
 
 ### Destroy _application_
@@ -291,7 +294,7 @@ Response Codes:
 
 ## Endpoints API
 
-The endpoints API lets you browse environment variables that are known to the deployment manager. 
+The endpoints API lets you browse environment variables that are known to the deployment manager.
 
 ### List environment variables
 ````
@@ -307,13 +310,13 @@ Example response:
 
 ## Datasets API
 
-The datasets API lets you browse and update data rention policies for datasets in the cluster. 
+The datasets API lets you browse and update data rention policies for datasets in the cluster.
 
 ### List datasets
 
-Datasets have a data retention __policy__ which can be set to __age__ or __size__, which controls whether the dataset has a maximum age in days (__max_age_days__) or size (__max_size_gigabytes__). 
+Datasets have a data retention __policy__ which can be set to __age__ or __size__, which controls whether the dataset has a maximum age in days (__max_age_days__) or size (__max_size_gigabytes__).
 
-Datasets have a data retention __mode__ which can be set to __archive__ or __delete__, which controls what happens to data when it has reached the maximum age or size. 
+Datasets have a data retention __mode__ which can be set to __archive__ or __delete__, which controls what happens to data when it has reached the maximum age or size.
 
 ````
 GET /datasets
@@ -393,7 +396,7 @@ Example body:
 
 The metrics API lets you browse metrics available for the cluster.
 
-### All values 
+### All values
 ````
 GET /
 
