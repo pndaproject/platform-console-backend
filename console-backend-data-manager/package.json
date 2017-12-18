@@ -18,12 +18,11 @@
     "debug": "~2.2.0",
     "morgan": "~1.6.1",
     "serve-favicon": "~2.3.0",
-    "acl": "~0.4.9",
-    "ldapjs": "~1.0.0",
     "nock": "7.7.0",
     "frisby": "latest",
     "jasmine-node": "latest",
-    "swagger-ui": "~2.1.4"
+    "swagger-ui": "~2.1.4",
+    "authenticate-pam": "1.0.2"
   },
   "devDependencies": {
     "grunt": "~0.4.5",
