@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+### Added
+- PNDA-3562: Add PAM authentication
+
 ## [0.4.0] 2017-06-29
 ### Added
 - PNDA-2691: Allow offline installation

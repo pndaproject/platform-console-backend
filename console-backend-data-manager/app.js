@@ -44,7 +44,7 @@ var packages = require('./routes/packages')(express, logger, cors, corsOptions, 
 var applications = require('./routes/applications')(express, logger, cors, corsOptions, config, Q, HTTP);
 var endpoints = require('./routes/endpoints')(express, logger, cors, corsOptions, config, Q, HTTP);
 var datasets = require('./routes/datasets')(express, logger, cors, corsOptions, config, Q, HTTP);
-var login = require('./routes/ldap_login')(express, logger);
+var pam = require('./routes/pam_login')(express, logger);
 var redis = require('redis');
 var hostname = process.env.HOSTNAME || 'localhost';
 var port = parseInt(process.env.PORT, 10) || 3123;
@@ -62,7 +62,7 @@ app.use('/metrics', metrics);
 app.use('/applications', applications);
 app.use('/packages', packages);
 app.use('/endpoints', endpoints);
-app.use('/login', login);
+app.use('/pam', pam);
 app.use('/datasets', datasets);
 app.use('/node_modules', express.static('node_modules'));
 app.use('/docs', express.static('docs'));
