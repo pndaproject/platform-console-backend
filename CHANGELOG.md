@@ -5,6 +5,9 @@ All notable changes to this project will be documented in this file.
 ### Added
 - PNDA-3562: Add PAM authentication
 
+### Changed:
+- PNDA-3601: disable emailtext in Jenkins file and replace it with notifier stage and job
+
 ## [0.4.0] 2017-06-29
 ### Added
 - PNDA-2691: Allow offline installation
