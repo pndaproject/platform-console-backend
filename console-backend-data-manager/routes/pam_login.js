@@ -23,10 +23,11 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger){
+module.exports = function(express, logger, passport) {
 
   var router = express.Router();
   var pam = require('authenticate-pam');
+  var CustomStrategy = require('passport-custom');
 
   //Base64 encoding/decoding service
   var Base64 = {
@@ -39,6 +40,33 @@ module.exports = function(express, logger){
     }
   };
 
+  passport.serializeUser(function(user, done) {
+    done(null, user);
+  });
+
+  passport.deserializeUser(function(user, done) {
+    done(null, user);
+  });
+
+  passport.use('strategy-pam', new CustomStrategy(
+    function(request, callback) {
+      var username = request.body.username;
+      var pass = Base64.decode(request.body.password);
+      logger.info('pam_login username: ' + username);
+      logger.info('pam_login pass: ' + request.body.password);
+      logger.info('pam_login pass: ' + pass);
+      pam.authenticate(username, pass, function(err) {
+        if (err !== undefined) {
+          logger.info('pam_login failed: ' + err);
+          callback(null, false, { message: 'login failed. ' + err });
+        }else {
+          logger.info('pam_login successful for user:' + username);
+          callback(null, username);
+        }
+      });
+    }
+  ));
+
   //use the acl module to provide roles
   /*jshint -W055 */
 
@@ -48,25 +76,16 @@ module.exports = function(express, logger){
     res.render('index');
   });
 
-  router.post('/validate', function(request, response) {
-    var username = request.body.username;
-    logger.info('PAM login request for user: '+username);
-    var pass = Base64.decode(request.body.password); //should be encrypted before calling
-    response.header("Access-Control-Allow-Origin", "*");
-    var output = function(err) {
-      var res=false;
-      if(err !== undefined){
-        logger.info('pam_login failed: '+err);
-      }else{
-        logger.info('pam_login successful');
-        res=true;
-      }
-      response.status(200);
-      response.json({ userName: username,
-                      success: res});
-    };
-    pam.authenticate(username, pass, output);
-    
+  router.post('/login', passport.authenticate('strategy-pam'), function(request, response) {
+    response.status(200);
+    response.json({ username: request.user });
+  });
+
+  router.get('/logout', function(request, response) {
+    request.logout();
+    response.status(200);
+    response.json({ session: "logout" });
+    logger.info('pam_login logout successful');
   });
 
   return router;

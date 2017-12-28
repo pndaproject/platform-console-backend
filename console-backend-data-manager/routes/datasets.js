@@ -24,11 +24,11 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
+module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
     // get list of packages asynchronously
     var getDatasets = function() {
       var deferred = Q.defer();
@@ -55,7 +55,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* GET dataset by id. */
-  router.get('/:id', cors(corsOptions), function(req, res) {
+  router.get('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var getDatasetDetails = function(id) {
       var deferred = Q.defer();
       var datasetApi = config.dataset_manager.host + config.dataset_manager.API.datasets + '/' + id;
@@ -99,7 +99,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
    * {"policy":"size","max_size_gigabytes":10}
    */
   router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.put('/:id', cors(corsOptions), function(req, res) {
+  router.put('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     logger.info('Got put request: ' + JSON.stringify(req.body));
     var datasetId = req.params.id;
     var message = req.body;

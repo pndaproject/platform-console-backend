@@ -25,14 +25,14 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
+module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
   /**
    * Get list of environment endpoints.
    */
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
     // get list of packages asynchronously
     var getEndpoints = function() {
       var deferred = Q.defer();
@@ -66,7 +66,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
 
       res.json({ endpoints: endpoints });
     });
-  }); 
+  });
 
   return router;
   

@@ -24,12 +24,12 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, dbManager) {
+module.exports = function(express, logger, cors, corsOptions, config, dbManager, isAuthenticated) {
 
   var router = express.Router();
-
+ 
   /* GET all metric keys and optionally values too */
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
     if (!req.param('values')) {
       dbManager.getAllKeys('metric:*', true, function(error, response) {
           if (error) {
@@ -52,7 +52,7 @@ module.exports = function(express, logger, cors, corsOptions, config, dbManager)
   });
 
   /* GET single metric value */
-  router.get('/:id', cors(corsOptions), function(req, res) {
+  router.get('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var key = req.params.id;
     var fields = ['source', 'value', 'timestamp'];
 
