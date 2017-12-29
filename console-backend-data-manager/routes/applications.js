@@ -63,6 +63,24 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
     return deferred.promise;
   }
 
+  function getApplicationSummary(id) {
+    var deferred = Q.defer();
+    var url = config.deployment_manager.host + config.deployment_manager.API.applications + "/" + id + "/summary";
+    logger.debug("get application summary:", url);
+    HTTP.request({ url: url }).then(function successCallback(res) {
+      return res.body.read().then(function(bodyStream) {
+        var body = bodyStream.toString('UTF-8');
+        return deferred.resolve(body);
+      });
+    }, function errorCallback(error) {
+      logger.error("get application details error response", error);
+      deferred.reject('error ' + error);
+    });
+
+    return deferred.promise;
+  }
+
+
   /* GET Application listing. */
   router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
     // get list of packages asynchronously
@@ -141,6 +159,22 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   router.get('/:id/status', cors(corsOptions), isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationStatus(id)]);
+    promise.then(function(results) {
+      var details = {};
+      try {
+        details = JSON.parse(results[0]);
+      } catch (e) {
+        logger.error("invalid results", results[0]);
+      }
+
+      res.json(details);
+    });
+  });
+
+  /* GET Application summary by id. */
+  router.get('/:id/summary', cors(corsOptions), isAuthenticated, function(req, res) {
+    var id = req.params.id;
+    var promise = Q.all([getApplicationSummary(id)]);
     promise.then(function(results) {
       var details = {};
       try {
