@@ -38,19 +38,51 @@ var corsParameters = require("../console-backend-utils/corsParameters");
 var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist) };
 var Q = require('q');
 var HTTP = require("q-io/http");
-var routes = require('./routes/index')(express, logger, cors, corsOptions, config, Q, HTTP,dbManager);
-var metrics = require('./routes/metrics')(express, logger, cors, corsOptions, config, dbManager);
-var packages = require('./routes/packages')(express, logger, cors, corsOptions, config, Q, HTTP);
-var applications = require('./routes/applications')(express, logger, cors, corsOptions, config, Q, HTTP);
-var endpoints = require('./routes/endpoints')(express, logger, cors, corsOptions, config, Q, HTTP);
-var datasets = require('./routes/datasets')(express, logger, cors, corsOptions, config, Q, HTTP);
-var pam = require('./routes/pam_login')(express, logger);
+var session = require('express-session');
+
+// if the user is authenticated
+var passport = require('passport');
+var isAuthenticated = function (req, res, next) {
+  if (!req.isAuthenticated()) {
+    res.json("not authenticated");
+  } else {
+    return next();
+  }
+};
+
+var pam = require('./routes/pam_login')(express, logger, passport);
+var routes = require('./routes/index')(express, logger, cors, corsOptions, config, Q, HTTP, dbManager, isAuthenticated);
+var metrics = require('./routes/metrics')(express, logger, cors, corsOptions, config, dbManager, isAuthenticated);
+var packages = require('./routes/packages')(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
+var applications = require('./routes/applications')
+  (express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
+var endpoints = require('./routes/endpoints')(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
+var datasets = require('./routes/datasets')(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
+var cookieParser = require('cookie-parser');
 var redis = require('redis');
 var hostname = process.env.HOSTNAME || 'localhost';
 var port = parseInt(process.env.PORT, 10) || 3123;
 
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({
+  secret: "data-manager-secret",
+  resave: true,
+  saveUninitialized: true
+}));
+app.use(function (req, res, next) {
+  for (var oneOrigin in config.whitelist) {
+    res.setHeader('Access-Control-Allow-Origin', config.whitelist[oneOrigin]);
+  }
+
+  res.setHeader('Access-Control-Allow-Credentials', true);
+  next();
+});
+
+// passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Start simple http server
 http.listen(port, hostname);

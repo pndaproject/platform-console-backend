@@ -25,7 +25,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
+module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
@@ -64,7 +64,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   }
 
   /* GET Application listing. */
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
     // get list of packages asynchronously
     var getApplications = function() {
       var deferred = Q.defer();
@@ -122,7 +122,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* GET Application by id. */
-  router.get('/:id', cors(corsOptions), function(req, res) {
+  router.get('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationDetails(id)]);
     promise.then(function(results) {
@@ -138,7 +138,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* GET Application status by id. */
-  router.get('/:id/status', cors(corsOptions), function(req, res) {
+  router.get('/:id/status', cors(corsOptions), isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationStatus(id)]);
     promise.then(function(results) {
@@ -154,7 +154,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* Start or Stop an application by id */
-  router.post('/:id/:action', cors(corsOptions), function(req, res) {
+  router.post('/:id/:action', cors(corsOptions), isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var action = req.params.action;
 
@@ -179,7 +179,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     }
   });
 
@@ -192,7 +192,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
    * @return 500 server error
    */
   router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.delete('/:id', cors(corsOptions), function(req, res) {
+  router.delete('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
 
     if (applicationId === undefined || applicationId === "") {
@@ -213,7 +213,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     }
   });
 
@@ -228,7 +228,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
    * @return 500 server error
    */
   router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.put('/:id', cors(corsOptions), function(req, res) {
+  router.put('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var body = JSON.stringify(req.body);
 
@@ -254,7 +254,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     }
   });
 

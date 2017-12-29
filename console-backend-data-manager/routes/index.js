@@ -23,21 +23,21 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, dbManager){
+module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, dbManager, isAuthenticated) {
 
-	var router = express.Router();
+  var router = express.Router();
 
-	/* GET all data listings regardless of type. */
-	router.get('/', cors(corsOptions), function(req, res) {
-	  dbManager.getAllKeys('*', false, function(error, response) {
-	    if (error) {
-	      logger.error("failed to get keys - " + error);
-	      res.json({ error: error });
-	    } else {
-	      res.json({ data: response });
-	    }
-	  });
-	});
+  /* GET all data listings regardless of type. */
+  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
+    dbManager.getAllKeys('*', false, function(error, response) {
+      if (error) {
+        logger.error("failed to get keys - " + error);
+        res.json({ error: error });
+      } else {
+        res.json({ data: response });
+      }
+    });
+  });
 
-	return router;
+  return router;
 };

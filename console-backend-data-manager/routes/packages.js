@@ -25,7 +25,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
+module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
@@ -87,7 +87,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   }
 
   /* Get a list of packages available and deployed. */
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
     var promise = Q.all([getAvailablePackages(), getDeployedPackages()]);
     promise.then(function(results) {
       var packages = [];
@@ -167,7 +167,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* Get a list of deployed packages. */
-  router.get('/deployed', cors(corsOptions), function(req, res) {
+  router.get('/deployed', cors(corsOptions), isAuthenticated, function(req, res) {
     var promise = Q.all([getDeployedPackages()]);
     promise.then(function(results) {
       var packages = [];
@@ -183,7 +183,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* GET Package status by id. */
-  router.get('/:id/status', cors(corsOptions), function(req, res) {
+  router.get('/:id/status', cors(corsOptions), isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getPackageStatus(id)]);
     promise.then(function(results) {
@@ -200,7 +200,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* Get package information by id. */
-  router.get('/:id', cors(corsOptions), function(req, res) {
+  router.get('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var getPackagesDetails = function(id) {
       var deferred = Q.defer();
       var url = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + id;
@@ -245,7 +245,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
    * @return 500 server error
    */
   router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.put('/:id', cors(corsOptions), function(req, res) {
+  router.put('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var packageId = req.params.id;
     var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
     logger.debug("packageId", packageId);
@@ -267,7 +267,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     } else {
       logger.error("Missing required package id to deploy the package");
       res.sendStatus(500);
@@ -283,7 +283,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
    * @return 500 server error
    */
   router.options('/:id', cors(corsOptions)); // enable pre-flight request for DELETE request
-  router.delete('/:id', cors(corsOptions), function(req, res) {
+  router.delete('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
     var packageId = req.params.id;
     var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
 
@@ -304,7 +304,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     } else {
       logger.error("Missing required package id to undeploy the package");
       res.sendStatus(500);
