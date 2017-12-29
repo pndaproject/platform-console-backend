@@ -52,9 +52,6 @@ module.exports = function(express, logger, passport) {
     function(request, callback) {
       var username = request.body.username;
       var pass = Base64.decode(request.body.password);
-      logger.info('pam_login username: ' + username);
-      logger.info('pam_login pass: ' + request.body.password);
-      logger.info('pam_login pass: ' + pass);
       pam.authenticate(username, pass, function(err) {
         if (err !== undefined) {
           logger.info('pam_login failed: ' + err);
