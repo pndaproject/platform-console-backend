@@ -25,7 +25,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated) {
+module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
@@ -64,7 +64,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   }
 
   /* GET Application listing. */
-  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/', isAuthenticated, function(req, res) {
     // get list of packages asynchronously
     var getApplications = function() {
       var deferred = Q.defer();
@@ -122,7 +122,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   });
 
   /* GET Application by id. */
-  router.get('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/:id', isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationDetails(id)]);
     promise.then(function(results) {
@@ -138,7 +138,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   });
 
   /* GET Application status by id. */
-  router.get('/:id/status', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/:id/status', isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationStatus(id)]);
     promise.then(function(results) {
@@ -154,7 +154,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   });
 
   /* Start or Stop an application by id */
-  router.post('/:id/:action', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.post('/:id/:action', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var action = req.params.action;
 
@@ -185,14 +185,8 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
 
   /**
    * Delete an application by id
-   *
-   * @param id  application ID
-   * @return 200 OK
-   * @return 404 application not known
-   * @return 500 server error
    */
-  router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.delete('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.delete('/:id', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
 
     if (applicationId === undefined || applicationId === "") {
@@ -219,16 +213,8 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
 
   /**
    * Create an application from a package
-   *
-   * @param id  application ID
-   * @return 202 Accepted
-   * @return 400 Request body failed validation
-   * @return 404 Package not found
-   * @return 409 Application already exists
-   * @return 500 server error
    */
-  router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.put('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.put('/:id', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var body = JSON.stringify(req.body);
 
