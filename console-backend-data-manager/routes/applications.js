@@ -80,7 +80,6 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
     return deferred.promise;
   }
 
-
   /* GET Application listing. */
   router.get('/', isAuthenticated, function(req, res) {
     // get list of packages asynchronously
@@ -172,7 +171,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
   });
 
   /* GET Application summary by id. */
-  router.get('/:id/summary', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/:id/summary', isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationSummary(id)]);
     promise.then(function(results) {
