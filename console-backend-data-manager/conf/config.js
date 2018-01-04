@@ -20,5 +20,6 @@ module.exports = {
     API: {
       datasets: "/api/v1/datasets"
     }
-  }
+  },
+  secret: "data-manager-secret"
 };
