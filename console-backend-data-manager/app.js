@@ -35,7 +35,7 @@ var dbManager = require('../console-backend-utils/dbManager')(logger);
 var config = require('./conf/config');
 var cors = require('cors');
 var corsParameters = require("../console-backend-utils/corsParameters");
-var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist) };
+var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist), credentials:true };
 var Q = require('q');
 var HTTP = require("q-io/http");
 var session = require('express-session');
@@ -51,18 +51,19 @@ var isAuthenticated = function (req, res, next) {
 };
 
 var pam = require('./routes/pam_login')(express, logger, passport);
-var routes = require('./routes/index')(express, logger, cors, corsOptions, config, Q, HTTP, dbManager, isAuthenticated);
-var metrics = require('./routes/metrics')(express, logger, cors, corsOptions, config, dbManager, isAuthenticated);
-var packages = require('./routes/packages')(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
+var routes = require('./routes/index')(express, logger, config, Q, HTTP, dbManager, isAuthenticated);
+var metrics = require('./routes/metrics')(express, logger, config, dbManager, isAuthenticated);
+var packages = require('./routes/packages')(express, logger, config, Q, HTTP, isAuthenticated);
 var applications = require('./routes/applications')
-  (express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
-var endpoints = require('./routes/endpoints')(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
-var datasets = require('./routes/datasets')(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated);
+  (express, logger, config, Q, HTTP, isAuthenticated);
+var endpoints = require('./routes/endpoints')(express, logger, config, Q, HTTP, isAuthenticated);
+var datasets = require('./routes/datasets')(express, logger, config, Q, HTTP, isAuthenticated);
 var cookieParser = require('cookie-parser');
 var redis = require('redis');
 var hostname = process.env.HOSTNAME || 'localhost';
 var port = parseInt(process.env.PORT, 10) || 3123;
 
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -71,14 +72,6 @@ app.use(session({
   resave: true,
   saveUninitialized: true
 }));
-app.use(function (req, res, next) {
-  for (var oneOrigin in config.whitelist) {
-    res.setHeader('Access-Control-Allow-Origin', config.whitelist[oneOrigin]);
-  }
-
-  res.setHeader('Access-Control-Allow-Credentials', true);
-  next();
-});
 
 // passport
 app.use(passport.initialize());

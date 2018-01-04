@@ -25,7 +25,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, isAuthenticated) {
+module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
@@ -87,7 +87,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   }
 
   /* Get a list of packages available and deployed. */
-  router.get('/', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/', isAuthenticated, function(req, res) {
     var promise = Q.all([getAvailablePackages(), getDeployedPackages()]);
     promise.then(function(results) {
       var packages = [];
@@ -167,7 +167,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   });
 
   /* Get a list of deployed packages. */
-  router.get('/deployed', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/deployed', isAuthenticated, function(req, res) {
     var promise = Q.all([getDeployedPackages()]);
     promise.then(function(results) {
       var packages = [];
@@ -183,7 +183,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   });
 
   /* GET Package status by id. */
-  router.get('/:id/status', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/:id/status', isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getPackageStatus(id)]);
     promise.then(function(results) {
@@ -200,7 +200,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
   });
 
   /* Get package information by id. */
-  router.get('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.get('/:id', isAuthenticated, function(req, res) {
     var getPackagesDetails = function(id) {
       var deferred = Q.defer();
       var url = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + id;
@@ -237,15 +237,8 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
 
   /**
    * Deploy a package
-   *
-   * @param id  package ID
-   * @return 202 accepted
-   * @return 404 package not deployed in repository
-   * @return 409 package already deployed
-   * @return 500 server error
    */
-  router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.put('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.put('/:id', isAuthenticated, function(req, res) {
     var packageId = req.params.id;
     var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
     logger.debug("packageId", packageId);
@@ -276,14 +269,8 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP, i
 
   /**
    * Undeploy a package
-   *
-   * @param id  package ID
-   * @return 202 accepted
-   * @return 404 package not deployed
-   * @return 500 server error
    */
-  router.options('/:id', cors(corsOptions)); // enable pre-flight request for DELETE request
-  router.delete('/:id', cors(corsOptions), isAuthenticated, function(req, res) {
+  router.delete('/:id', isAuthenticated, function(req, res) {
     var packageId = req.params.id;
     var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
 
