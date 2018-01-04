@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Added
 - PNDA-3562: Add PAM authentication
 - PNDA-3596: use passportjs for managing authentication
+- PNDA-2834: Actual application status by deployment manager
 
 ### Changed:
 - PNDA-3601: disable emailtext in Jenkins file and replace it with notifier stage and job
