@@ -69,13 +69,14 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
-  secret: config.secret,
+  secret: config.session.secret,
   resave: true,
-  saveUninitialized: true
+  saveUninitialized: true, 
+  cookie: { maxAge: config.session.max_age }
 }));
 io.use(passportSocketIo.authorize({
   key: 'connect.sid',
-  secret: config.secret,
+  secret: config.session.secret,
   passport: passport,
   cookieParser: cookieParser
 }));

@@ -21,5 +21,8 @@ module.exports = {
       datasets: "/api/v1/datasets"
     }
   },
-  secret: "data-manager-secret"
+  session: {
+    secret: "data-manager-secret",
+    max_age: 60000
+  }
 };
