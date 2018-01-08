@@ -7,13 +7,14 @@ All notable changes to this project will be documented in this file.
 - PNDA-3596: use passportjs for managing authentication
 - PNDA-2834: Actual application status by deployment manager
 
-### Changed:
+### Changed
 - PNDA-3601: disable emailtext in Jenkins file and replace it with notifier stage and job
 
 ### Fixed
 - PNDA-3609: use passeport on socketio and put the secret in configuration file
 - PNDA-3626: use the secure cookie information to create an application.
 - PNDA-3635: fix issue on socketio by using session store to Redis
+- PNDA-3622: stop the build if a command failed
 
 ## [0.4.0] 2017-06-29
 ### Added
