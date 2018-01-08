@@ -248,6 +248,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
    * Create an application from a package
    */
   router.put('/:id', isAuthenticated, function(req, res) {
+    req.body.user = req.user;
     var applicationId = req.params.id;
     var body = JSON.stringify(req.body);
 
