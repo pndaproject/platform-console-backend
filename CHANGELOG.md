@@ -10,6 +10,9 @@ All notable changes to this project will be documented in this file.
 ### Changed:
 - PNDA-3601: disable emailtext in Jenkins file and replace it with notifier stage and job
 
+### Fixed
+- PNDA-3609: use passeport on socketio and put the secret in configuration file
+
 ## [0.4.0] 2017-06-29
 ### Added
 - PNDA-2691: Allow offline installation

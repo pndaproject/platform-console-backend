@@ -39,6 +39,7 @@ var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist), crede
 var Q = require('q');
 var HTTP = require("q-io/http");
 var session = require('express-session');
+var passportSocketIo = require('passport.socketio');
 
 // if the user is authenticated
 var passport = require('passport');
@@ -68,9 +69,16 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
-  secret: "data-manager-secret",
+  secret: config.session.secret,
   resave: true,
-  saveUninitialized: true
+  saveUninitialized: true, 
+  cookie: { maxAge: config.session.max_age }
+}));
+io.use(passportSocketIo.authorize({
+  key: 'connect.sid',
+  secret: config.session.secret,
+  passport: passport,
+  cookieParser: cookieParser
 }));
 
 // passport
