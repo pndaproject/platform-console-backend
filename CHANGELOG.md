@@ -12,6 +12,7 @@ All notable changes to this project will be documented in this file.
 
 ### Fixed
 - PNDA-3609: use passeport on socketio and put the secret in configuration file
+- PNDA-3626: use the secure cookie information to create an application.
 
 ## [0.4.0] 2017-06-29
 ### Added
