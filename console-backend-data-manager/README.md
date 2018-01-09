@@ -8,6 +8,9 @@ For an interactive Swagger API console, see __/docs__.
 
 For some Frisby unit tests, see __/tests__.
 
+* [Login API](#login-api)
+  * [POST /pam/login](#login)
+  * [POST /pam/logout](#logout)
 * [Packages API](#packages-api)
   * [GET /packages](#list-all-packages)
   * [GET /packages/deployed](#list-deployed-packages)
@@ -27,13 +30,43 @@ For some Frisby unit tests, see __/tests__.
   * [GET /datasets](#list-datasets)
   * [GET /datasets/_datasets_](#get-dataset)
   * [PUT /datasets/_datasets_](#update-dataset)
-* [Login API](#login-api)
-  * [GET /login](#login)
-  * [POST /login/validate](#validate-login)
 * [Metrics API](#metrics-api)
   * [GET /](#all-values)
   * [GET /metrics](#list-metrics)
   * [PUT /datasets/_datasets_](#get-metric)
+
+
+## Login API
+
+To access the Data manager API, you will need to login. The login API uses [PassPort authentication middleware for Nodejs](http://www.passportjs.org/) with [Asynchronous PAM authentication for NodeJS](https://www.npmjs.com/package/authenticate-pam) as the Custom strategy. Once logged in, this will create a PassPort session which is shared with Express session.
+
+### Login
+````
+POST /pam/login
+
+Headers: 'Content-Type': 'application/x-www-form-urlencoded'
+
+Response Codes:
+200 - OK
+401 - Unauthorized
+500 - Server Error
+
+Example body:
+username=pnda&password=cG5kYQ==
+````
+The password must be encoded in Base64
+
+### Logout
+````
+GET /pam/logout
+
+Response Codes:
+200 - OK
+500 - Server Error
+
+Example body:
+{"session":"logout"}
+````
 
 ## Packages API
 
@@ -343,40 +376,6 @@ Example response:
 ````
 
 ### Update dataset
-````
-PUT /datasets/<dataset>
-
-Response Codes:
-200 - OK
-404 - Not found
-500 - Server Error
-
-Example body:
-{"mode":"archive"}
-{"mode":"delete"}
-{"policy":"age","max_age_days":30}
-{"policy":"size","max_size_gigabytes":10}
-````
-
-## Login API
-
-### Login
-````
-PUT /datasets/<dataset>
-
-Response Codes:
-200 - OK
-404 - Not found
-500 - Server Error
-
-Example body:
-{"mode":"archive"}
-{"mode":"delete"}
-{"policy":"age","max_age_days":30}
-{"policy":"size","max_size_gigabytes":10}
-````
-
-### Validate login
 ````
 PUT /datasets/<dataset>
 
