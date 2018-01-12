@@ -40,6 +40,8 @@ var Q = require('q');
 var HTTP = require("q-io/http");
 var session = require('express-session');
 var passportSocketIo = require('passport.socketio');
+var redis = require('redis');
+var RedisStore = require("connect-redis")(session);
 
 // if the user is authenticated
 var passport = require('passport');
@@ -50,6 +52,7 @@ var isAuthenticated = function (req, res, next) {
     return next();
   }
 };
+var sessionStore = new RedisStore({ client: redis.createClient() });
 
 var pam = require('./routes/pam_login')(express, logger, passport);
 var routes = require('./routes/index')(express, logger, config, Q, HTTP, dbManager, isAuthenticated);
@@ -60,7 +63,6 @@ var applications = require('./routes/applications')
 var endpoints = require('./routes/endpoints')(express, logger, config, Q, HTTP, isAuthenticated);
 var datasets = require('./routes/datasets')(express, logger, config, Q, HTTP, isAuthenticated);
 var cookieParser = require('cookie-parser');
-var redis = require('redis');
 var hostname = process.env.HOSTNAME || 'localhost';
 var port = parseInt(process.env.PORT, 10) || 3123;
 
@@ -69,17 +71,35 @@ app.use(bodyParser.json());
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(session({
+  store: sessionStore,
   secret: config.session.secret,
   resave: true,
   saveUninitialized: true, 
   cookie: { maxAge: config.session.max_age }
 }));
 io.use(passportSocketIo.authorize({
+  store: sessionStore,
   key: 'connect.sid',
   secret: config.session.secret,
   passport: passport,
-  cookieParser: cookieParser
+  cookieParser: cookieParser,
+  success:     onAuthorizeSuccess,
+  fail:        onAuthorizeFail
 }));
+
+function onAuthorizeSuccess(data, accept){
+  logger.info('successful connection to socket.io');
+  accept();
+}
+
+function onAuthorizeFail(data, message, error, accept){
+  if(error)
+      throw new Error(message);
+    logger.error('failed connection to socket.io:', message);
+  
+  if(error)
+      accept(new Error(message));
+}
 
 // passport
 app.use(passport.initialize());
