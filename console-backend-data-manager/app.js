@@ -52,6 +52,7 @@ var isAuthenticated = function (req, res, next) {
     return next();
   }
 };
+
 var sessionStore = new RedisStore({ client: redis.createClient() });
 
 var pam = require('./routes/pam_login')(express, logger, passport);
@@ -74,9 +75,24 @@ app.use(session({
   store: sessionStore,
   secret: config.session.secret,
   resave: true,
-  saveUninitialized: true, 
+  saveUninitialized: true,
   cookie: { maxAge: config.session.max_age }
 }));
+
+function onAuthorizeSuccess(data, accept) {
+  logger.info('successful connection to socket.io');
+  accept();
+}
+
+function onAuthorizeFail(data, message, error, accept) {
+  if (error)
+      throw new Error(message);
+  logger.error('failed connection to socket.io:', message);
+  
+  if (error)
+      accept(new Error(message));
+}
+
 io.use(passportSocketIo.authorize({
   store: sessionStore,
   key: 'connect.sid',
@@ -86,20 +102,6 @@ io.use(passportSocketIo.authorize({
   success:     onAuthorizeSuccess,
   fail:        onAuthorizeFail
 }));
-
-function onAuthorizeSuccess(data, accept){
-  logger.info('successful connection to socket.io');
-  accept();
-}
-
-function onAuthorizeFail(data, message, error, accept){
-  if(error)
-      throw new Error(message);
-    logger.error('failed connection to socket.io:', message);
-  
-  if(error)
-      accept(new Error(message));
-}
 
 // passport
 app.use(passport.initialize());
