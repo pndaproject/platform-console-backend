@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [1.0.0] 2018-02-10
 ### Added
 - PNDA-439: Support deploying/running app as specific user
 - PNDA-3562: Add PAM authentication
