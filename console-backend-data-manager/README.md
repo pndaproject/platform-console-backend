@@ -331,7 +331,7 @@ The endpoints API lets you browse environment variables that are known to the de
 
 ### List environment variables
 ````
-GET /environment/endpoints
+GET /endpoints
 
 Response Codes:
 200 - OK
