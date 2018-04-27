@@ -272,7 +272,8 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
    */
   router.delete('/:id', isAuthenticated, function(req, res) {
     var packageId = req.params.id;
-    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
+    var userName = req.query.user;
+    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId + '?user=' + userName;
 
     if (packageId && packageId !== "") {
       logger.info("Undeploying package " + packageId + " to " + req.body.action);

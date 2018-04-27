@@ -190,6 +190,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
   router.post('/:id/:action', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var action = req.params.action;
+    var userName = req.query.user;
 
     if (applicationId === undefined || applicationId === "" || action === undefined) {
       logger.error("Missing required key params to start or stop an application");
@@ -200,7 +201,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
       logger.info("Application " + applicationId + action);
       var request = {
         url: config.deployment_manager.host + config.deployment_manager.API.applications +
-          "/" + applicationId + "/" + action,
+          "/" + applicationId + "/" + action + '?user=' + userName,
         method: "POST"
       };
       var statusRet = 500;
@@ -221,6 +222,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
    */
   router.delete('/:id', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
+    var userName = req.query.user;
 
     if (applicationId === undefined || applicationId === "") {
       logger.error("Missing required key params to delete an application");
@@ -228,7 +230,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
     } else {
       logger.info("Application " + applicationId + "DELETING ");
       var request = {
-        url: config.deployment_manager.host + config.deployment_manager.API.applications + "/" + applicationId,
+        url: config.deployment_manager.host + config.deployment_manager.API.applications + "/" + applicationId + '?user=' + userName,
         method: "DELETE"
       };
       var statusRet = 500;
@@ -251,6 +253,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
     req.body.user = req.user;
     var applicationId = req.params.id;
     var body = JSON.stringify(req.body);
+    var userName = req.query.user;
 
     if (applicationId === undefined || applicationId === "") {
       logger.error("Missing required key params to create an application");
@@ -260,7 +263,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
     } else {
       logger.info("Application being created :" + applicationId + " from package " + req.body.package);
       var request = {
-        url: config.deployment_manager.host + config.deployment_manager.API.applications + "/" + applicationId,
+        url: config.deployment_manager.host + config.deployment_manager.API.applications + "/" + applicationId + '?user=' + userName,
         method: "PUT",
         body: [body],
         headers: { "Content-Type": "application/json" }
