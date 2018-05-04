@@ -13,6 +13,7 @@ All notable changes to this project will be documented in this file.
 ### Changed
 - PNDA-3601: Disable emailtext in Jenkins file and replace it with notifier stage and job
 - PNDA-3624: Update Login API
+- PNDA-4546: Pass user to Deployment Manager APIs as a URL parameter instead of in the body
 
 ### Fixed
 - PNDA-3609: Use passport on socketio and put the secret in configuration file
