@@ -201,7 +201,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
       logger.info("Application " + applicationId + action);
       var request = {
         url: config.deployment_manager.host + config.deployment_manager.API.applications +
-          "/" + applicationId + "/" + action + '?user=' + userName,
+          "/" + applicationId + "/" + action + '?user.name=' + userName,
         method: "POST"
       };
       var statusRet = 500;
@@ -231,7 +231,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
       logger.info("Application " + applicationId + "DELETING ");
       var request = {
         url: config.deployment_manager.host + config.deployment_manager.API.applications + 
-          "/" + applicationId + '?user=' + userName,
+          "/" + applicationId + '?user.name=' + userName,
         method: "DELETE"
       };
       var statusRet = 500;
@@ -264,7 +264,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
       logger.info("Application being created :" + applicationId + " from package " + req.body.package);
       var request = {
         url: config.deployment_manager.host + config.deployment_manager.API.applications + 
-          "/" + applicationId + '?user=' + userName,
+          "/" + applicationId + '?user.name=' + userName,
         method: "PUT",
         body: [body],
         headers: { "Content-Type": "application/json" }
