@@ -190,7 +190,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
   router.post('/:id/:action', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var action = req.params.action;
-    var userName = req.query.user;
+    var userName = req.query['user.name'];
 
     if (applicationId === undefined || applicationId === "" || action === undefined) {
       logger.error("Missing required key params to start or stop an application");
@@ -222,7 +222,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
    */
   router.delete('/:id', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
-    var userName = req.query.user;
+    var userName = req.query['user.name'];
 
     if (applicationId === undefined || applicationId === "") {
       logger.error("Missing required key params to delete an application");
@@ -253,7 +253,7 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
   router.put('/:id', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var body = JSON.stringify(req.body);
-    var userName = req.query.user;
+    var userName = req.query['user.name'];
 
     if (applicationId === undefined || applicationId === "") {
       logger.error("Missing required key params to create an application");
