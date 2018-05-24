@@ -8,7 +8,8 @@ All notable changes to this project will be documented in this file.
 - PNDA-439: Support deploying/running app as specific user
 - PNDA-3562: Add PAM authentication
 - PNDA-3596: Use passportjs for managing authentication
-- PNDA-2834: Actual application status by deployment manager
+- PNDA-2834: Report application status by deployment manager
+- PNDA-4560: Provide identity to all deployment manager API calls
 
 ### Changed
 - PNDA-3601: Disable emailtext in Jenkins file and replace it with notifier stage and job
