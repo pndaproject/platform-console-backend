@@ -115,6 +115,7 @@ Example response:
 	"status": "DEPLOYED",
 	"version": "1.0.23",
 	"name": "spark-batch-example-app",
+	"user": "who-deployed-this",
 	"defaults": {
 		"oozie": {
 			"example": {

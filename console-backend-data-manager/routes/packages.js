@@ -240,7 +240,9 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
    */
   router.put('/:id', isAuthenticated, function(req, res) {
     var packageId = req.params.id;
-    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
+    var userName = req.query['user.name'];
+    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId +
+      '?user.name=' + userName;
     logger.debug("packageId", packageId);
 
     if (packageId && packageId !== "") {
@@ -272,7 +274,9 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
    */
   router.delete('/:id', isAuthenticated, function(req, res) {
     var packageId = req.params.id;
-    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId;
+    var userName = req.query['user.name'];
+    var deployAPI = config.deployment_manager.host + config.deployment_manager.API.packages + '/' + packageId +
+      '?user.name=' + userName;
 
     if (packageId && packageId !== "") {
       logger.info("Undeploying package " + packageId + " to " + req.body.action);
