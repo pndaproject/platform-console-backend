@@ -40,7 +40,7 @@ var datasetTests = {
 };
 
 frisby.create('Get datasets')
-  .get('http://localhost:3123/datasets')
+  .get('http://localhost:3123/api/dm/datasets')
   .expectStatus(200)
   .expectHeaderContains('Content-Type', 'application/json')
   .expectJSONTypes('data.*', datasetTests)
