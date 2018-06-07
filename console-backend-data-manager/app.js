@@ -113,12 +113,12 @@ http.listen(port, hostname);
 // Setup App routes
 app.use('/', routes); // simple response for getting current app version info etc if we want it
 
-app.use('/metrics', metrics);
-app.use('/applications', applications);
-app.use('/packages', packages);
-app.use('/endpoints', endpoints);
+app.use('/api/dm/metrics', metrics);
+app.use('/api/dm/applications', applications);
+app.use('/api/dm/packages', packages);
+app.use('/api/dm/endpoints', endpoints);
 app.use('/pam', pam);
-app.use('/datasets', datasets);
+app.use('/api/dm/datasets', datasets);
 app.use('/node_modules', express.static('node_modules'));
 app.use('/docs', express.static('docs'));
 

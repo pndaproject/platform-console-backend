@@ -54,7 +54,7 @@ frisby.create('POST metric')
   .after(function (err, res, body) {
     expect(body).toMatch('OK')
     frisby.create('GET metric')
-      .get('http://localhost:3123/metrics/' + metric)
+      .get('http://localhost:3123/api/dm/metrics/' + metric)
       .expectStatus(200)
       .expectHeaderContains('Content-Type', 'application/json')
       .expectJSON({
