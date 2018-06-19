@@ -55,7 +55,7 @@ var isAuthenticated = function (req, res, next) {
 
 var sessionStore = new RedisStore({ client: redis.createClient() });
 
-var pam = require('./routes/pam_login')(express, logger, passport);
+var pam = require('./routes/pam_login')(express, logger, passport, config);
 var routes = require('./routes/index')(express, logger, config, Q, HTTP, dbManager, isAuthenticated);
 var metrics = require('./routes/metrics')(express, logger, config, dbManager, isAuthenticated);
 var packages = require('./routes/packages')(express, logger, config, Q, HTTP, isAuthenticated);
@@ -76,6 +76,7 @@ app.use(session({
   secret: config.session.secret,
   resave: true,
   saveUninitialized: true,
+  rolling: true,
   cookie: { maxAge: config.session.max_age }
 }));
 

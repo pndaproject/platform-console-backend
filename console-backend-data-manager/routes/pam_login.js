@@ -23,7 +23,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, passport) {
+module.exports = function(express, logger, passport, config) {
 
   var router = express.Router();
   var pam = require('authenticate-pam');
@@ -75,7 +75,15 @@ module.exports = function(express, logger, passport) {
 
   router.post('/login', passport.authenticate('strategy-pam'), function(request, response) {
     response.status(200);
-    response.json({ username: request.user });
+    if (config.session.max_age <= config.session.session_expiry_warning_duration) {
+      logger.error("session max age value is less than the session expiry warning timeout value");
+      response.json({ username: request.user });
+    }
+    else {
+      response.json({ username: request.user,
+                    session_max_age: config.session.max_age,
+                    session_expiry_warning_duration: config.session.session_expiry_warning_duration });
+    }
   });
 
   router.get('/logout', function(request, response) {
