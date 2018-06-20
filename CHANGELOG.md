@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+### Fixed
+- PNDA-4226: Expire sessions after inactivity rather than a fixed time period
 
 ## [1.0.0] 2018-02-10
 ### Added
