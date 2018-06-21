@@ -27,7 +27,7 @@
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var io = require('socket.io')(http, {path: '/updates/socket.io'});
 var bodyParser = require('body-parser');
 var path = require('path');
 var logger = require("../console-backend-utils/logger")('../console-backend-data-manager/conf/logger.json');
