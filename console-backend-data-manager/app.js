@@ -93,7 +93,7 @@ function onAuthorizeFail(data, message, error, accept) {
   if (error)
       accept(new Error(message));
 }
-
+io.set('heartbeat interval', 15000);
 io.use(passportSocketIo.authorize({
   store: sessionStore,
   key: 'connect.sid',
