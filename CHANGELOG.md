@@ -4,10 +4,12 @@ All notable changes to this project will be documented in this file.
 ## [Unreleased]
 ### Fixed
 - PNDA-4226: Expire sessions after inactivity rather than a fixed time period
+- PNDA-4560: Provide identity to all deployment manager API calls
 
 ### Changed
+- PNDA-4546: Pass user to Deployment Manager APIs as a URL parameter instead of in the body
+- PNDA-4613: Rename user parameter for deployment manager API from user to user.name to match the default knox behaviour
 - PNDA-4761: Pass server time with metrics response
-
 
 ## [1.0.0] 2018-02-10
 ### Added
@@ -15,13 +17,10 @@ All notable changes to this project will be documented in this file.
 - PNDA-3562: Add PAM authentication
 - PNDA-3596: Use passportjs for managing authentication
 - PNDA-2834: Report application status by deployment manager
-- PNDA-4560: Provide identity to all deployment manager API calls
 
 ### Changed
 - PNDA-3601: Disable emailtext in Jenkins file and replace it with notifier stage and job
 - PNDA-3624: Update Login API
-- PNDA-4546: Pass user to Deployment Manager APIs as a URL parameter instead of in the body
-- PNDA-4613: Rename user parameter for deployment manager API from user to user.name to match the default knox behaviour
 
 ### Fixed
 - PNDA-3609: Use passport on socketio and put the secret in configuration file
