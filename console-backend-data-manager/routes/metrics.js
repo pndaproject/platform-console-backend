@@ -45,7 +45,7 @@ module.exports = function(express, logger, config, dbManager, isAuthenticated) {
             logger.error("failed to get keys and values - " + error);
             res.json({ error: error });
           } else {
-            res.json({ metrics: response });
+            res.json({ metrics: response, servertime: Date.now().toString() });
           }
         });
     }
