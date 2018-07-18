@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - PNDA-4226: Expire sessions after inactivity rather than a fixed time period
 
+### Changed
+- PNDA-4761: Pass server time with metrics response
+
+
 ## [1.0.0] 2018-02-10
 ### Added
 - PNDA-439: Support deploying/running app as specific user
