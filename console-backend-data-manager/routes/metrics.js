@@ -41,13 +41,21 @@ module.exports = function(express, logger, config, dbManager, isAuthenticated) {
         });
     } else {
       dbManager.getAllMetricKeysAndValues(function(error, response) {
-          if (error) {
-            logger.error("failed to get keys and values - " + error);
-            res.json({ error: error });
-          } else {
-            res.json({ metrics: response, servertime: Date.now().toString() });
-          }
-        });
+        if (error) {
+          logger.error("failed to get keys and values - " + error);
+          res.json({ error: error });
+        } else {
+          dbManager.getKeyValuesForFields("topic:kafka.available.topics", "value", function(err, reply){
+            if (err){
+              logger.error("failed to get value - " + err);
+              res.json({ error: err });
+            } else {
+              res.json({ metrics: response, currentTopics: JSON.parse(reply[0].replace(/'/g, '"')),
+                         servertime:Date.now().toString()});
+            }
+          });
+        }
+      });
     }
   });
 
