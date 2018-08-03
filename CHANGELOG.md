@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file.
 ### Fixed
 - PNDA-4226: Expire sessions after inactivity rather than a fixed time period
 - PNDA-4560: Provide identity to all deployment manager API calls
+- PNDA-4754: Fix list of kafka topics to match what is currently present on kafka by removing old ones
 
 ### Changed
 - PNDA-4546: Pass user to Deployment Manager APIs as a URL parameter instead of in the body
