@@ -70,7 +70,7 @@ module.exports = function(logger) {
        }
 
       if ((id) && (data)) {
-        if (notification && id.indexOf('metric:') >= 0 && id.indexOf('.health') <= 0) {
+        if (notification && ( id.indexOf('metric:') >= 0 || id.indexOf('topic:') >= 0) && id.indexOf('.health') <= 0) {
           redisClient.hmget(id, ['value'], function(err, reply) {
                 if (reply[0] === data.value) {
                   notification = false;
