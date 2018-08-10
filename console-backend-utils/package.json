@@ -4,7 +4,7 @@
   "description": "Common shared utils for the different platform console backend applications",
   "main": "",
   "dependencies": {
-    "async": "^1.5.0",
+    "async": "^1.5.2",
     "redis-parser": "2.0.4",    
     "redis": "^2.4.2",
     "winston": "^2.1.1",
