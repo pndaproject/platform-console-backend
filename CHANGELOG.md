@@ -2,6 +2,8 @@
 All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
+
+## [2.0.0] 2018-08-28
 ### Fixed
 - PNDA-4226: Expire sessions after inactivity rather than a fixed time period
 - PNDA-4560: Provide identity to all deployment manager API calls
