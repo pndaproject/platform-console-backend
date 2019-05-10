@@ -424,6 +424,11 @@
       "resolved": "https://registry.npmjs.org/jsbn/-/jsbn-0.1.1.tgz",
       "optional": true
     },
+    "jsdoc": {
+      "version": "3.5.5",
+      "from": "jsdoc@3.5.5",
+      "resolved": "https://registry.npmjs.com/jsdoc/-/jsdoc-3.5.5.tgz"
+    },
     "json-schema": {
       "version": "0.2.3",
       "from": "json-schema@0.2.3",
