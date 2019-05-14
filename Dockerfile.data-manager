@@ -1,0 +1,14 @@
+FROM node:8.16
+
+COPY console-backend-utils /console-backend-utils/
+COPY console-backend-data-manager /console-backend-data-manager/
+
+RUN apt update && apt install libpam0g-dev
+
+WORKDIR /console-backend-utils
+
+RUN npm install --production
+
+WORKDIR /console-backend-data-manager
+
+RUN npm install --production

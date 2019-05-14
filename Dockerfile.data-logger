@@ -1,0 +1,12 @@
+FROM node:12.2
+
+COPY console-backend-utils /console-backend-utils/
+COPY console-backend-data-logger /console-backend-data-logger/
+
+WORKDIR /console-backend-utils
+
+RUN npm install --production
+
+WORKDIR /console-backend-data-logger
+
+RUN npm install --production
