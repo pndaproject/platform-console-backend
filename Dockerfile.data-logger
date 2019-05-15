@@ -1,4 +1,4 @@
-FROM node:12.2
+FROM node:12.2-slim
 
 COPY console-backend-utils /console-backend-utils/
 COPY console-backend-data-logger /console-backend-data-logger/
