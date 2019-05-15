@@ -24,6 +24,8 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
+process.on('SIGINT', () => { process.exit(1); });
+
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
@@ -42,6 +44,7 @@ var session = require('express-session');
 var passportSocketIo = require('passport.socketio');
 var redis = require('redis');
 var RedisStore = require("connect-redis")(session);
+var redisUrl = process.env.REDIS || 'redis://localhost';
 
 // if the user is authenticated
 var passport = require('passport');
@@ -53,7 +56,7 @@ var isAuthenticated = function (req, res, next) {
   }
 };
 
-var sessionStore = new RedisStore({ client: redis.createClient() });
+var sessionStore = new RedisStore({ client: redis.createClient(redisUrl) });
 
 var pam = require('./routes/pam_login')(express, logger, passport, config);
 var routes = require('./routes/index')(express, logger, config, Q, HTTP, dbManager, isAuthenticated);
@@ -127,15 +130,15 @@ app.use('/docs', express.static('docs'));
 // NOTE: We are using different channels to communicate any data updates on the backend; all updates
 // are published to the client and it's up to them to filter as needed.
 // Metric Subscriber
-var backendDataUpdateMetricSubscriber = redis.createClient();
+var backendDataUpdateMetricSubscriber = redis.createClient(redisUrl);
 backendDataUpdateMetricSubscriber.subscribe('platform-console-backend-metric-update');
 
 // Package Subscriber
-var backendDataUpdatePackageSubscriber = redis.createClient();
+var backendDataUpdatePackageSubscriber = redis.createClient(redisUrl);
 backendDataUpdatePackageSubscriber.subscribe('platform-console-backend-package-update');
 
 // Application Subscriber
-var backendDataUpdateApplicationSubscriber = redis.createClient();
+var backendDataUpdateApplicationSubscriber = redis.createClient(redisUrl);
 backendDataUpdateApplicationSubscriber.subscribe('platform-console-backend-application-update');
 
 logger.info("PNDA Platform Console Backend Data Manager started...");
