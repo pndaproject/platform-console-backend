@@ -19,3 +19,5 @@ COPY --from=build /console-backend-utils /console-backend-utils/
 COPY --from=build /console-backend-data-manager /console-backend-data-manager/
 
 WORKDIR /console-backend-data-manager
+
+RUN useradd pnda && echo "pnda:pnda" | chpasswd
