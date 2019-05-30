@@ -50,7 +50,8 @@ module.exports = function(express, logger, config, dbManager, isAuthenticated) {
               logger.error("failed to get value - " + err);
               res.json({ error: err });
             } else {
-              res.json({ metrics: response, currentTopics: JSON.parse(reply[0].replace(/'/g, '"')),
+              res.json({ metrics: response,
+                         currentTopics: (reply[0] ? JSON.parse(reply[0].replace(/'/g, '"')) : []),
                          servertime:Date.now().toString()});
             }
           });
