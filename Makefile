@@ -1,7 +1,11 @@
-MANAGER=console-backend-data-manager:0.1.2
-LOGGER=console-backend-data-logger:0.1
+MANAGER=console-backend-data-manager:release5.0
+LOGGER=console-backend-data-logger:release5.0
 
-REGISTRY=containers.cisco.com/donaldh
+REGISTRY=pnda
+
+build:		build-manager build-logger
+
+upload:		upload-manager upload-logger
 
 build-manager:	## Build the manager docker image
 	docker build -t "$(MANAGER)" -f Dockerfile.data-manager .
@@ -20,5 +24,5 @@ upload-logger:	## Upload logger image to registry
 help:	## This help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z_-]+:.*?## / {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST)
 
-.PHONY: help
+.PHONY: help build upload
 .DEFAULT_GOAL := help
