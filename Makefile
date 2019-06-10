@@ -15,7 +15,7 @@ upload-manager:	## Upload manager image to registry
 	docker push "$(REGISTRY)/$(MANAGER)"
 
 build-logger:	## Build the logger docker image
-	docker build -t "$(LOGGER)" -f Dockerfile.data-manager .
+	docker build -t "$(LOGGER)" -f Dockerfile.data-logger .
 
 upload-logger:	## Upload logger image to registry
 	docker tag "$(LOGGER)" "$(REGISTRY)/$(LOGGER)"
