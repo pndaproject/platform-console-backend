@@ -27,7 +27,8 @@
 var redis = require('redis');
 var async = require('async');
 
-var redisClient = redis.createClient();
+var redisUrl = process.env.REDIS || 'redis://localhost';
+var redisClient = redis.createClient(redisUrl);
 
 function stripRedisDataIdentifiers(responseArray) {
     // Strip-out the prefix data identifier (e.g. 'metric:' etc.) as client doesn't need to care

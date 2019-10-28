@@ -1,0 +1,23 @@
+FROM node:8.16 as build
+
+COPY console-backend-utils /console-backend-utils/
+COPY console-backend-data-manager /console-backend-data-manager/
+
+RUN apt update && apt install libpam0g-dev
+
+WORKDIR /console-backend-utils
+
+RUN npm install --production
+
+WORKDIR /console-backend-data-manager
+
+RUN npm install --production
+
+FROM node:8.16-slim
+
+COPY --from=build /console-backend-utils /console-backend-utils/
+COPY --from=build /console-backend-data-manager /console-backend-data-manager/
+
+WORKDIR /console-backend-data-manager
+
+RUN useradd pnda && echo "pnda:pnda" | chpasswd
