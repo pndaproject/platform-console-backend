@@ -3,6 +3,14 @@ All notable changes to this project will be documented in this file.
 
 ## [Unreleased]
 
+## [2.1.1] 2019-11-13
+### Fixed
+- Multiple security vulnerabilities
+
+## [2.1.0] 2019-11-11
+### Added:
+- Docker Container support
+
 ## [2.0.0] 2018-08-28
 ### Fixed
 - PNDA-4226: Expire sessions after inactivity rather than a fixed time period
