@@ -49,7 +49,7 @@ frisby.create('POST package')
   .after(function (err, res, body) {
     expect(body).toMatch('OK')
     frisby.create('GET package')
-      .get('http://localhost:3123/applications/' + id)
+      .get('http://localhost:3123/api/dm/applications/' + id)
       .expectStatus(200)
       .expectHeaderContains('Content-Type', 'application/json')
       .expectJSON({

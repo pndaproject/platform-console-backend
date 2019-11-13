@@ -1,6 +1,36 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [Unreleased]
+
+## [2.0.0] 2018-08-28
+### Fixed
+- PNDA-4226: Expire sessions after inactivity rather than a fixed time period
+- PNDA-4560: Provide identity to all deployment manager API calls
+- PNDA-4754: Fix list of kafka topics to match what is currently present on kafka by removing old ones
+
+### Changed
+- PNDA-4546: Pass user to Deployment Manager APIs as a URL parameter instead of in the body
+- PNDA-4613: Rename user parameter for deployment manager API from user to user.name to match the default knox behaviour
+- PNDA-4761: Pass server time with metrics response
+
+## [1.0.0] 2018-02-10
+### Added
+- PNDA-439: Support deploying/running app as specific user
+- PNDA-3562: Add PAM authentication
+- PNDA-3596: Use passportjs for managing authentication
+- PNDA-2834: Report application status by deployment manager
+
+### Changed
+- PNDA-3601: Disable emailtext in Jenkins file and replace it with notifier stage and job
+- PNDA-3624: Update Login API
+
+### Fixed
+- PNDA-3609: Use passport on socketio and put the secret in configuration file
+- PNDA-3626: Use the secure cookie information to create an application.
+- PNDA-3635: Fix issue on socketio by using session store to Redis
+- PNDA-3622: Stop the build if a command failed
+
 ## [0.4.0] 2017-06-29
 ### Added
 - PNDA-2691: Allow offline installation

@@ -25,7 +25,7 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
+module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
@@ -63,8 +63,25 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
     return deferred.promise;
   }
 
+  function getApplicationSummary(id) {
+    var deferred = Q.defer();
+    var url = config.deployment_manager.host + config.deployment_manager.API.applications + "/" + id + "/summary";
+    logger.debug("get application summary:", url);
+    HTTP.request({ url: url }).then(function successCallback(res) {
+      return res.body.read().then(function(bodyStream) {
+        var body = bodyStream.toString('UTF-8');
+        return deferred.resolve(body);
+      });
+    }, function errorCallback(error) {
+      logger.error("get application details error response", error);
+      deferred.reject('error ' + error);
+    });
+
+    return deferred.promise;
+  }
+
   /* GET Application listing. */
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', isAuthenticated, function(req, res) {
     // get list of packages asynchronously
     var getApplications = function() {
       var deferred = Q.defer();
@@ -122,7 +139,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* GET Application by id. */
-  router.get('/:id', cors(corsOptions), function(req, res) {
+  router.get('/:id', isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationDetails(id)]);
     promise.then(function(results) {
@@ -138,7 +155,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
   });
 
   /* GET Application status by id. */
-  router.get('/:id/status', cors(corsOptions), function(req, res) {
+  router.get('/:id/status', isAuthenticated, function(req, res) {
     var id = req.params.id;
     var promise = Q.all([getApplicationStatus(id)]);
     promise.then(function(results) {
@@ -153,10 +170,27 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
     });
   });
 
+  /* GET Application summary by id. */
+  router.get('/:id/summary', isAuthenticated, function(req, res) {
+    var id = req.params.id;
+    var promise = Q.all([getApplicationSummary(id)]);
+    promise.then(function(results) {
+      var details = {};
+      try {
+        details = JSON.parse(results[0]);
+      } catch (e) {
+        logger.error("invalid results", results[0]);
+      }
+
+      res.json(details);
+    });
+  });
+
   /* Start or Stop an application by id */
-  router.post('/:id/:action', cors(corsOptions), function(req, res) {
+  router.post('/:id/:action', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var action = req.params.action;
+    var userName = req.query['user.name'];
 
     if (applicationId === undefined || applicationId === "" || action === undefined) {
       logger.error("Missing required key params to start or stop an application");
@@ -167,7 +201,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
       logger.info("Application " + applicationId + action);
       var request = {
         url: config.deployment_manager.host + config.deployment_manager.API.applications +
-          "/" + applicationId + "/" + action,
+          "/" + applicationId + "/" + action + '?user.name=' + userName,
         method: "POST"
       };
       var statusRet = 500;
@@ -179,21 +213,16 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     }
   });
 
   /**
    * Delete an application by id
-   *
-   * @param id  application ID
-   * @return 200 OK
-   * @return 404 application not known
-   * @return 500 server error
    */
-  router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.delete('/:id', cors(corsOptions), function(req, res) {
+  router.delete('/:id', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
+    var userName = req.query['user.name'];
 
     if (applicationId === undefined || applicationId === "") {
       logger.error("Missing required key params to delete an application");
@@ -201,7 +230,8 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
     } else {
       logger.info("Application " + applicationId + "DELETING ");
       var request = {
-        url: config.deployment_manager.host + config.deployment_manager.API.applications + "/" + applicationId,
+        url: config.deployment_manager.host + config.deployment_manager.API.applications + 
+          "/" + applicationId + '?user.name=' + userName,
         method: "DELETE"
       };
       var statusRet = 500;
@@ -213,24 +243,17 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     }
   });
 
   /**
    * Create an application from a package
-   *
-   * @param id  application ID
-   * @return 202 Accepted
-   * @return 400 Request body failed validation
-   * @return 404 Package not found
-   * @return 409 Application already exists
-   * @return 500 server error
    */
-  router.options('/:id', cors(corsOptions)); // enable pre-flight request for PUT request
-  router.put('/:id', cors(corsOptions), function(req, res) {
+  router.put('/:id', isAuthenticated, function(req, res) {
     var applicationId = req.params.id;
     var body = JSON.stringify(req.body);
+    var userName = req.query['user.name'];
 
     if (applicationId === undefined || applicationId === "") {
       logger.error("Missing required key params to create an application");
@@ -240,7 +263,8 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
     } else {
       logger.info("Application being created :" + applicationId + " from package " + req.body.package);
       var request = {
-        url: config.deployment_manager.host + config.deployment_manager.API.applications + "/" + applicationId,
+        url: config.deployment_manager.host + config.deployment_manager.API.applications + 
+          "/" + applicationId + '?user.name=' + userName,
         method: "PUT",
         body: [body],
         headers: { "Content-Type": "application/json" }
@@ -254,7 +278,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
              logger.error(request.method, request.url, "error: ", error.status);
              statusRet = error.status;
            })
-           .then(function(data) { res.status(statusRet).send(data); }, function(data) { res.sendStatus(500);} );
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
     }
   });
 

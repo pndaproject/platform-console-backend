@@ -34,9 +34,15 @@ module.exports = function(express, async, logger, dbManager, cors, corsOptions){
     if (req.body) {
       async.each(req.body.data, function(item, callback) {
         if (item.metric !== null && item.metric !== "") {
-          dbManager.create('metric:' + item.metric, item, 'platform-console-backend-metric-update', function(error) {
-            callback(error);
-          });
+          if (!(item.metric.includes("available.topics"))) {
+            dbManager.create('metric:' + item.metric, item, 'platform-console-backend-metric-update', function(error) {
+              callback(error);
+            });
+          } else {
+            dbManager.create('topic:' + item.metric, item, 'platform-console-backend-metric-update', function(error) {
+              callback(error);
+            });
+          }
 
           var metrics = {};
           metrics[item.metric] = item.value;

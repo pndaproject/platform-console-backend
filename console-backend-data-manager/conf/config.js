@@ -7,7 +7,7 @@ var whitelist = ['http://localhost', 'http://' + hostname, 'http://' + hostname 
 module.exports = {
   whitelist: whitelist,
   deployment_manager: {
-    host: "http://localhost:5000",
+    host: "http://deployment-manager:5000",
     API: {
       endpoints: "/environment/endpoints",
       packages_available: "/repository/packages?recency=999",
@@ -20,5 +20,9 @@ module.exports = {
     API: {
       datasets: "/api/v1/datasets"
     }
+  },
+  session: {
+    secret: "data-manager-secret",
+    max_age: 60000
   }
 };

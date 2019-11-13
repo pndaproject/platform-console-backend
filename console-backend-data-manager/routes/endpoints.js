@@ -2,7 +2,7 @@
 * Name:        endpoints.js
 * Purpose:     PNDA Console Data Manager Packages API retrieving endpoints
 *              information from the PNDA Deployment Manager.
-* Requires:    express, cors(corsOptions), Q, HTTP, logger, config
+* Requires:    express, Q, HTTP, logger, config
 *
 * Author:      PNDA Team
 * Created:     2016/01/01
@@ -25,14 +25,14 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
+module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
 
   var router = express.Router();
 
   /**
    * Get list of environment endpoints.
    */
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', isAuthenticated, function(req, res) {
     // get list of packages asynchronously
     var getEndpoints = function() {
       var deferred = Q.defer();
@@ -66,7 +66,7 @@ module.exports = function(express, logger, cors, corsOptions, config, Q, HTTP){
 
       res.json({ endpoints: endpoints });
     });
-  }); 
+  });
 
   return router;
   

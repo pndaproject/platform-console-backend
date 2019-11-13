@@ -26,6 +26,8 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
+process.on('SIGINT', () => { process.exit(1); });
+
 var express = require('express');
 var async = require('async');
 var path = require('path');

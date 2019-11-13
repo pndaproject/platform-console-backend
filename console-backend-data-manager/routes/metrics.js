@@ -24,12 +24,12 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
-module.exports = function(express, logger, cors, corsOptions, config, dbManager) {
+module.exports = function(express, logger, config, dbManager, isAuthenticated) {
 
   var router = express.Router();
-
+ 
   /* GET all metric keys and optionally values too */
-  router.get('/', cors(corsOptions), function(req, res) {
+  router.get('/', isAuthenticated, function(req, res) {
     if (!req.param('values')) {
       dbManager.getAllKeys('metric:*', true, function(error, response) {
           if (error) {
@@ -41,18 +41,27 @@ module.exports = function(express, logger, cors, corsOptions, config, dbManager)
         });
     } else {
       dbManager.getAllMetricKeysAndValues(function(error, response) {
-          if (error) {
-            logger.error("failed to get keys and values - " + error);
-            res.json({ error: error });
-          } else {
-            res.json({ metrics: response });
-          }
-        });
+        if (error) {
+          logger.error("failed to get keys and values - " + error);
+          res.json({ error: error });
+        } else {
+          dbManager.getKeyValuesForFields("topic:kafka.available.topics", "value", function(err, reply){
+            if (err){
+              logger.error("failed to get value - " + err);
+              res.json({ error: err });
+            } else {
+              res.json({ metrics: response,
+                         currentTopics: (reply[0] ? JSON.parse(reply[0].replace(/'/g, '"')) : []),
+                         servertime:Date.now().toString()});
+            }
+          });
+        }
+      });
     }
   });
 
   /* GET single metric value */
-  router.get('/:id', cors(corsOptions), function(req, res) {
+  router.get('/:id', isAuthenticated, function(req, res) {
     var key = req.params.id;
     var fields = ['source', 'value', 'timestamp'];
 

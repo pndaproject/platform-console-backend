@@ -2,46 +2,79 @@
 
 The platform-console-data-manager project contains a Node.js app that provides a number of services for the platform-console-frontend web app via a REST API interface. In many cases, the backend simply provides a wrapper for REST APIs from other services.
 
-By default, the data manager runs on port 3123. 
+By default, the data manager runs on port 3123.
 
 For an interactive Swagger API console, see __/docs__.
 
 For some Frisby unit tests, see __/tests__.
 
-* [Packages API](#packages-api)
-  * [GET /packages](#list-all-packages)
-  * [GET /packages/deployed](#list-deployed-packages)
-  * [GET /packages/_package_](#get-full-information-for-package)
-  * [PUT /packages/_package_](#deploy-package-to-the-cluster)
-  * [DELETE /packages/_package_](#undeploy-package-from-the-cluster)
-* [Applications API](#applications-api)
-  * [GET /applications](#list-all-applications)
-  * [POST /applications/_application_/start](#start-application)
-  * [POST /applications/_application_/stop](#stop-application)
-  * [GET /applications/_application_](#get-full-information-for-application)
-  * [PUT /applications/_application_](#create-application-from-package)
-  * [DELETE /applications/_application_](#destroy-application)
-* [Endpoints API](#environment-endpoints-api)
-  * [GET /environment/endpoints](#list-environment-variables)
-* [Datasets API](#datasets-api)
-  * [GET /datasets](#list-datasets)
-  * [GET /datasets/_datasets_](#get-dataset)
-  * [PUT /datasets/_datasets_](#update-dataset)
 * [Login API](#login-api)
-  * [GET /login](#login)
-  * [POST /login/validate](#validate-login)
+  * [POST /pam/login](#login)
+  * [POST /pam/logout](#logout)
+* [Packages API](#packages-api)
+  * [GET /api/dm/packages](#list-all-packages)
+  * [GET /api/dm/packages/deployed](#list-deployed-packages)
+  * [GET /api/dm/packages/_package_](#get-full-information-for-package)
+  * [PUT /api/dm/packages/_package_](#deploy-package-to-the-cluster)
+  * [DELETE /api/dm/packages/_package_](#undeploy-package-from-the-cluster)
+* [Applications API](#applications-api)
+  * [GET /api/dm/applications](#list-all-applications)
+  * [POST /api/dm/applications/_application_/start](#start-application)
+  * [POST /api/dm/applications/_application_/stop](#stop-application)
+  * [GET /api/dm/applications/_application_](#get-full-information-for-application)
+  * [PUT /api/dm/applications/_application_](#create-application-from-package)
+  * [DELETE /api/dm/applications/_application_](#destroy-application)
+* [Endpoints API](#environment-endpoints-api)
+  * [GET /api/dm/endpoints](#list-environment-variables)
+* [Datasets API](#datasets-api)
+  * [GET /api/dm/datasets](#list-datasets)
+  * [GET /api/dm/datasets/_datasets_](#get-dataset)
+  * [PUT /api/dm/datasets/_datasets_](#update-dataset)
 * [Metrics API](#metrics-api)
   * [GET /](#all-values)
-  * [GET /metrics](#list-metrics)
-  * [PUT /datasets/_datasets_](#get-metric)
+  * [GET /api/dm/metrics](#list-metrics)
+  * [PUT /api/dm/datasets/_datasets_](#get-metric)
+
+
+## Login API
+
+To access the Data manager API, you will need to login. The login API uses [PassPort authentication middleware for Nodejs](http://www.passportjs.org/) with [Asynchronous PAM authentication for NodeJS](https://www.npmjs.com/package/authenticate-pam) as the Custom strategy. Once logged in, this will create a PassPort session which is shared with Express session.
+
+### Login
+````
+POST /pam/login
+
+Headers: 'Content-Type': 'application/x-www-form-urlencoded'
+
+Response Codes:
+200 - OK
+401 - Unauthorized
+500 - Server Error
+
+Example body:
+username=pnda&password=cG5kYQ==
+````
+The password must be encoded in Base64
+
+### Logout
+````
+GET /pam/logout
+
+Response Codes:
+200 - OK
+500 - Server Error
+
+Example body:
+{"session":"logout"}
+````
 
 ## Packages API
 
-The packages API lets you see what software packages are available for deployment in the cluster. You can deploy packages, which turns them into applications. 
+The packages API lets you see what software packages are available for deployment in the cluster. You can deploy packages, which turns them into applications.
 
 ### List all packages
-````    
-GET /packages
+````
+GET /api/dm/packages
 
 Response Codes:
 200 - OK
@@ -53,7 +86,7 @@ Example response:
 
 ### List deployed packages
 ````
-GET /packages/deployed
+GET /api/dm/packages/deployed
 
 Response Codes:
 200 - OK
@@ -71,7 +104,7 @@ UNDEPLOYING
 
 ### Get full information for _package_
 ````
-GET /packages/<package>
+GET /api/dm/packages/<package>
 
 Response Codes:
 200 - OK
@@ -82,6 +115,7 @@ Example response:
 	"status": "DEPLOYED",
 	"version": "1.0.23",
 	"name": "spark-batch-example-app",
+	"user": "who-deployed-this",
 	"defaults": {
 		"oozie": {
 			"example": {
@@ -101,7 +135,7 @@ Example response:
 
 ### Deploy _package_ to the cluster
 ````
-PUT /packages/<package>
+PUT /api/dm/packages/<package>
 
 Response Codes:
 202 - Accepted, poll /packages/<package>/status for status
@@ -112,7 +146,7 @@ Response Codes:
 
 ### Undeploy _package_ from the cluster
 ````
-DELETE /packages/<package>
+DELETE /api/dm/packages/<package>
 
 Response Codes:
 202 - Accepted, poll /packages/<package>/status for status
@@ -122,11 +156,11 @@ Response Codes:
 
 ## Applications API
 
-The applications API lets you see what applications are available in the cluster. You can start, stop, and delete applications. 
+The applications API lets you see what applications are available in the cluster. You can start, stop, and delete applications.
 
 ### List all applications
 ````
-GET /applications
+GET /api/dm/applications
 
 Response Codes:
 200 - OK
@@ -138,7 +172,7 @@ Example response:
 
 ### List applications that have been created from _package_
 ````
-GET /packages/<package>/applications
+GET /api/dm/packages/<package>/applications
 
 Response Codes:
 200 - OK
@@ -150,7 +184,7 @@ Example response:
 
 ### Get the status for _application_
 ````
-GET /applications/<application>/status
+GET /api/dm/applications/<application>/status
 
 Response Codes:
 200 - OK
@@ -172,7 +206,7 @@ DESTROYING
 
 ### Get run-time details for _application_
 ````
-GET /applications/<application>/detail
+GET /api/dm/applications/<application>/detail
 
 Response Codes:
 200 - OK
@@ -181,7 +215,7 @@ Response Codes:
 
 {
         "status": "STARTED",
-        "name": "mini-mouse-masher",
+        "name": "application-name",
         "yarn-ids": [
             {"component":"example", "type":"oozie", "yarn-id":"application_1455877292606_0404"}
         ]
@@ -190,7 +224,7 @@ Response Codes:
 
 ### Start _application_
 ````
-POST /applications/<application>/start
+POST /api/dm/applications/<application>/start
 
 Response Codes:
 202 - Accepted, poll /applications/<application>/status for status
@@ -200,7 +234,7 @@ Response Codes:
 
 ### Stop _application_
 ````
-POST /applications/<application>/stop
+POST /api/dm/applications/<application>/stop
 
 Response Codes:
 202 - Accepted, poll /applications/<application>/status for status
@@ -210,7 +244,7 @@ Response Codes:
 
 ### Get full information for _application_
 ````
-GET /applications/<application>
+GET /api/dm/applications/<application>
 
 Response Codes:
 200 - OK
@@ -227,6 +261,7 @@ Example response:
 			}
 		}
 	},
+	"user": "somebody",
 	"package_name": "spark-batch-example-app-1.0.23",
 	"name": "spark-batch-example-app-instance",
 	"defaults": {
@@ -249,8 +284,9 @@ Example response:
 ### Create _application_ from _package_
 
 ````
-PUT /applications/<application>
+PUT /api/dm/applications/<application>
 {
+	"user": "<username>",
 	"package": "<package>",
 	"<componentType>": {
 		"<componentName>": {
@@ -268,6 +304,7 @@ Response Codes:
 
 Example body:
 {
+	"user": "somebody",
 	"package": "<package>",
 	"oozie": {
 		"example": {
@@ -276,12 +313,12 @@ Example body:
 	}
 }
 
-Package is mandatory, property settings are optional
+Package and user are mandatory, property settings are optional
 ````
 
 ### Destroy _application_
 ````
-DELETE /applications/<application>
+DELETE /api/dm/applications/<application>
 
 Response Codes:
 200 - OK
@@ -291,11 +328,11 @@ Response Codes:
 
 ## Endpoints API
 
-The endpoints API lets you browse environment variables that are known to the deployment manager. 
+The endpoints API lets you browse environment variables that are known to the deployment manager.
 
 ### List environment variables
 ````
-GET /environment/endpoints
+GET /api/dm/endpoints
 
 Response Codes:
 200 - OK
@@ -307,16 +344,16 @@ Example response:
 
 ## Datasets API
 
-The datasets API lets you browse and update data rention policies for datasets in the cluster. 
+The datasets API lets you browse and update data rention policies for datasets in the cluster.
 
 ### List datasets
 
-Datasets have a data retention __policy__ which can be set to __age__ or __size__, which controls whether the dataset has a maximum age in days (__max_age_days__) or size (__max_size_gigabytes__). 
+Datasets have a data retention __policy__ which can be set to __age__ or __size__, which controls whether the dataset has a maximum age in days (__max_age_days__) or size (__max_size_gigabytes__).
 
-Datasets have a data retention __mode__ which can be set to __archive__ or __delete__, which controls what happens to data when it has reached the maximum age or size. 
+Datasets have a data retention __mode__ which can be set to __archive__ or __delete__, which controls what happens to data when it has reached the maximum age or size.
 
 ````
-GET /datasets
+GET /api/dm/datasets
 
 Response Codes:
 200 - OK
@@ -328,7 +365,7 @@ Example response:
 
 ### Get dataset
 ````
-GET /datasets/<dataset>
+GET /api/dm/datasets/<dataset>
 
 Response Codes:
 200 - OK
@@ -341,41 +378,7 @@ Example response:
 
 ### Update dataset
 ````
-PUT /datasets/<dataset>
-
-Response Codes:
-200 - OK
-404 - Not found
-500 - Server Error
-
-Example body:
-{"mode":"archive"}
-{"mode":"delete"}
-{"policy":"age","max_age_days":30}
-{"policy":"size","max_size_gigabytes":10}
-````
-
-## Login API
-
-### Login
-````
-PUT /datasets/<dataset>
-
-Response Codes:
-200 - OK
-404 - Not found
-500 - Server Error
-
-Example body:
-{"mode":"archive"}
-{"mode":"delete"}
-{"policy":"age","max_age_days":30}
-{"policy":"size","max_size_gigabytes":10}
-````
-
-### Validate login
-````
-PUT /datasets/<dataset>
+PUT /api/dm/datasets/<dataset>
 
 Response Codes:
 200 - OK
@@ -393,9 +396,9 @@ Example body:
 
 The metrics API lets you browse metrics available for the cluster.
 
-### All values 
+### All values
 ````
-GET /
+GET /api/dm/
 
 Response Codes:
 200 - OK
@@ -421,7 +424,7 @@ Example response:
 
 ### List metrics
 ````
-GET /metrics
+GET /api/dm/metrics
 
 Response Codes:
 200 - OK
@@ -440,7 +443,7 @@ Example response:
 
 ### Get metric
 ````
-GET /metrics/<metric>
+GET /api/dm/metrics/<metric>
 
 Response Codes:
 200 - OK

@@ -27,7 +27,7 @@
 var frisby = require('frisby');
 
 frisby.create('Get metrics')
-  .get('http://localhost:3123/metrics')
+  .get('http://localhost:3123/api/dm/metrics')
   .expectStatus(200)
   .expectHeaderContains('Content-Type', 'application/json')
   .expectJSONTypes({

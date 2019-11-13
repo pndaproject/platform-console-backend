@@ -27,7 +27,7 @@
 var frisby = require('frisby');
 
 frisby.create('Get packages')
-  .get('http://localhost:3123/packages')
+  .get('http://localhost:3123/api/dm/packages')
   .expectStatus(200)
   .expectHeaderContains('Content-Type', 'application/json')
   .expectJSONTypes('packages.*', {

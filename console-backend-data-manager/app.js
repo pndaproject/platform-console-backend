@@ -24,10 +24,12 @@
 * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 *-------------------------------------------------------------------------------*/
 
+process.on('SIGINT', () => { process.exit(1); });
+
 var express = require('express');
 var app = express();
 var http = require('http').Server(app);
-var io = require('socket.io')(http);
+var io = require('socket.io')(http, {path: '/updates/socket.io'});
 var bodyParser = require('body-parser');
 var path = require('path');
 var logger = require("../console-backend-utils/logger")('../console-backend-data-manager/conf/logger.json');
@@ -35,22 +37,79 @@ var dbManager = require('../console-backend-utils/dbManager')(logger);
 var config = require('./conf/config');
 var cors = require('cors');
 var corsParameters = require("../console-backend-utils/corsParameters");
-var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist) };
+var corsOptions = { origin: corsParameters.verifyOrigin(config.whitelist), credentials:true };
 var Q = require('q');
 var HTTP = require("q-io/http");
-var routes = require('./routes/index')(express, logger, cors, corsOptions, config, Q, HTTP,dbManager);
-var metrics = require('./routes/metrics')(express, logger, cors, corsOptions, config, dbManager);
-var packages = require('./routes/packages')(express, logger, cors, corsOptions, config, Q, HTTP);
-var applications = require('./routes/applications')(express, logger, cors, corsOptions, config, Q, HTTP);
-var endpoints = require('./routes/endpoints')(express, logger, cors, corsOptions, config, Q, HTTP);
-var datasets = require('./routes/datasets')(express, logger, cors, corsOptions, config, Q, HTTP);
-var login = require('./routes/ldap_login')(express, logger);
+var session = require('express-session');
+var passportSocketIo = require('passport.socketio');
 var redis = require('redis');
+var RedisStore = require("connect-redis")(session);
+var redisUrl = process.env.REDIS || 'redis://localhost';
+
+// if the user is authenticated
+var passport = require('passport');
+var isAuthenticated = function (req, res, next) {
+  if (!req.isAuthenticated()) {
+    res.json("not authenticated");
+  } else {
+    return next();
+  }
+};
+
+var sessionStore = new RedisStore({ client: redis.createClient(redisUrl) });
+
+var pam = require('./routes/pam_login')(express, logger, passport, config);
+var routes = require('./routes/index')(express, logger, config, Q, HTTP, dbManager, isAuthenticated);
+var metrics = require('./routes/metrics')(express, logger, config, dbManager, isAuthenticated);
+var packages = require('./routes/packages')(express, logger, config, Q, HTTP, isAuthenticated);
+var applications = require('./routes/applications')
+  (express, logger, config, Q, HTTP, isAuthenticated);
+var endpoints = require('./routes/endpoints')(express, logger, config, Q, HTTP, isAuthenticated);
+var datasets = require('./routes/datasets')(express, logger, config, Q, HTTP, isAuthenticated);
+var cookieParser = require('cookie-parser');
 var hostname = process.env.HOSTNAME || 'localhost';
 var port = parseInt(process.env.PORT, 10) || 3123;
 
+app.use(cors(corsOptions));
 app.use(bodyParser.json());
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(session({
+  store: sessionStore,
+  secret: config.session.secret,
+  resave: true,
+  saveUninitialized: true,
+  rolling: true,
+  cookie: { maxAge: config.session.max_age }
+}));
+
+function onAuthorizeSuccess(data, accept) {
+  logger.info('successful connection to socket.io');
+  accept();
+}
+
+function onAuthorizeFail(data, message, error, accept) {
+  if (error)
+      throw new Error(message);
+  logger.error('failed connection to socket.io:', message);
+  
+  if (error)
+      accept(new Error(message));
+}
+io.set('heartbeat interval', 15000);
+io.use(passportSocketIo.authorize({
+  store: sessionStore,
+  key: 'connect.sid',
+  secret: config.session.secret,
+  passport: passport,
+  cookieParser: cookieParser,
+  success:     onAuthorizeSuccess,
+  fail:        onAuthorizeFail
+}));
+
+// passport
+app.use(passport.initialize());
+app.use(passport.session());
 
 // Start simple http server
 http.listen(port, hostname);
@@ -58,12 +117,12 @@ http.listen(port, hostname);
 // Setup App routes
 app.use('/', routes); // simple response for getting current app version info etc if we want it
 
-app.use('/metrics', metrics);
-app.use('/applications', applications);
-app.use('/packages', packages);
-app.use('/endpoints', endpoints);
-app.use('/login', login);
-app.use('/datasets', datasets);
+app.use('/api/dm/metrics', metrics);
+app.use('/api/dm/applications', applications);
+app.use('/api/dm/packages', packages);
+app.use('/api/dm/endpoints', endpoints);
+app.use('/pam', pam);
+app.use('/api/dm/datasets', datasets);
 app.use('/node_modules', express.static('node_modules'));
 app.use('/docs', express.static('docs'));
 
@@ -71,15 +130,15 @@ app.use('/docs', express.static('docs'));
 // NOTE: We are using different channels to communicate any data updates on the backend; all updates
 // are published to the client and it's up to them to filter as needed.
 // Metric Subscriber
-var backendDataUpdateMetricSubscriber = redis.createClient();
+var backendDataUpdateMetricSubscriber = redis.createClient(redisUrl);
 backendDataUpdateMetricSubscriber.subscribe('platform-console-backend-metric-update');
 
 // Package Subscriber
-var backendDataUpdatePackageSubscriber = redis.createClient();
+var backendDataUpdatePackageSubscriber = redis.createClient(redisUrl);
 backendDataUpdatePackageSubscriber.subscribe('platform-console-backend-package-update');
 
 // Application Subscriber
-var backendDataUpdateApplicationSubscriber = redis.createClient();
+var backendDataUpdateApplicationSubscriber = redis.createClient(redisUrl);
 backendDataUpdateApplicationSubscriber.subscribe('platform-console-backend-application-update');
 
 logger.info("PNDA Platform Console Backend Data Manager started...");
