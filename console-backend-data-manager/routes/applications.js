@@ -285,6 +285,36 @@ module.exports = function(express, logger, config, Q, HTTP, isAuthenticated) {
   });
 
   /**
+   * Restart an application by id
+   */
+  router.post('/:id', isAuthenticated, function(req, res) {
+    var applicationId = req.params.id;
+    var userName = req.query['user.name'];
+
+    if (applicationId === undefined || applicationId === "") {
+      logger.error("Missing required key params to restart an application");
+      res.sendStatus(404);
+    } else {
+      logger.info("Application " + applicationId + "RESTARTING ");
+      var request = {
+        url: config.deployment_manager.host + config.deployment_manager.API.applications + 
+          "/" + applicationId + '?user.name=' + userName,
+        method: "POST"
+      };
+      var statusRet = 500;
+      HTTP.request(request)
+           .then(function(response) {
+             logger.info(request.method, request.url, "success: ", response.status);
+             statusRet = response.status; return response.body.read();
+           }, function(error) {
+             logger.error(request.method, request.url, "error: ", error.status);
+             statusRet = error.status;
+           })
+           .then(function(data) { res.status(statusRet).send(data); }, function() { res.sendStatus(500);});
+    }
+  });
+
+  /**
    * Delete an application by id
    */
   router.delete('/:id', isAuthenticated, function(req, res) {
